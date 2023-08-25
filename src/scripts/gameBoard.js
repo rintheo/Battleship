@@ -3,6 +3,7 @@ import Cell from './cell';
 export default class GameBoard {
   constructor() {
     this.board = [];
+    this.fleet = [];
   }
 
   createBoard() {
@@ -31,6 +32,18 @@ export default class GameBoard {
       if (isPlacedHorizontally) this.board[i][y].assign(ship);
       if (!isPlacedHorizontally) this.board[x][i].assign(ship);
     }
+    this.fleet.push(ship);
     ship.isPositioned();
+  }
+
+  receiveAttack([x, y]) {
+    this.board[x][y].hit();
+    if (this.board[x][y].ship !== null) {
+      this.board[x][y].ship.hit();
+    }
+  }
+
+  isFleetOperational() {
+    return this.fleet.some((ship) => ship.hasSunk === false);
   }
 }

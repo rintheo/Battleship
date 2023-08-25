@@ -7,6 +7,7 @@ describe('Tests for GameBoard class', () => {
   let carrier;
   let battleship;
   let cruiser;
+  let submarine;
   let destroyer;
 
   beforeEach(() => {
@@ -130,6 +131,65 @@ describe('Tests for GameBoard class', () => {
       // gameBoard.board[-1][2] is out of bounds west
       expect(gameBoard.board[0][2].ship).toBe(null);
       expect(gameBoard.board[1][2].ship).toBe(null);
+    });
+  });
+
+  describe('Receiving attacks', () => {
+    beforeEach(() => {
+      carrier = new Ship(5);
+      gameBoard.placeShip([5, 5], carrier, true);
+    });
+
+    test('Receive an attack but misses a ship', () => {
+      gameBoard.receiveAttack([1, 1]);
+      expect(gameBoard.board[1][1].isHit).toBe(true);
+      expect(gameBoard.board[1][1].ship).toBe(null);
+      expect(gameBoard.board[4][5].ship.hits).toBe(0);
+    });
+
+    test('Receive an attack and hit a ship', () => {
+      gameBoard.receiveAttack([4, 5]);
+      expect(gameBoard.board[4][5].isHit).toBe(true);
+      expect(gameBoard.board[4][5].ship).toBe(carrier);
+      expect(gameBoard.board[4][5].ship.hits).toBe(1);
+    });
+  });
+
+  describe('Reporting fleet status', () => {
+    beforeEach(() => {
+      carrier = new Ship(5);
+      battleship = new Ship(4);
+      cruiser = new Ship(3);
+      submarine = new Ship(3);
+      destroyer = new Ship(2);
+      gameBoard.placeShip([5, 3], carrier, true);
+      gameBoard.placeShip([5, 4], battleship, true);
+      gameBoard.placeShip([5, 5], cruiser, true);
+      gameBoard.placeShip([5, 6], submarine, true);
+      gameBoard.placeShip([5, 7], destroyer, true);
+    });
+
+    test('Checks true if there are still any ship operational', () => {
+      expect(gameBoard.isFleetOperational()).toBe(true);
+
+      battleship.isSunk();
+      expect(gameBoard.isFleetOperational()).toBe(true);
+
+      carrier.isSunk();
+      cruiser.isSunk();
+      expect(gameBoard.isFleetOperational()).toBe(true);
+
+      submarine.isSunk();
+      expect(gameBoard.isFleetOperational()).toBe(true);
+    });
+
+    test('Checks false if all ships have sunk', () => {
+      battleship.isSunk();
+      carrier.isSunk();
+      cruiser.isSunk();
+      submarine.isSunk();
+      destroyer.isSunk();
+      expect(gameBoard.isFleetOperational()).toBe(false);
     });
   });
 });
