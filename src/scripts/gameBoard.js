@@ -6,6 +6,10 @@ export default class GameBoard {
     this.fleet = [];
   }
 
+  getBoard() {
+    return this.board;
+  }
+
   createBoard() {
     for (let i = 0; i < 10; i += 1) {
       this.board[i] = [];
@@ -45,5 +49,15 @@ export default class GameBoard {
 
   isFleetOperational() {
     return this.fleet.some((ship) => ship.hasSunk === false);
+  }
+
+  allUnhitCoordinates() {
+    const unhitCoordinates = [];
+    for (let i = 0; i < 10; i += 1) {
+      for (let j = 0; j < 10; j += 1) {
+        if (!this.board[i][j].isHit) unhitCoordinates.push([i, j]);
+      }
+    }
+    return unhitCoordinates;
   }
 }
