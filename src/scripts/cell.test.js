@@ -17,7 +17,6 @@ describe('Tests for class Cell', () => {
       cell.hit();
       expect(cell.ship).toBe(null);
       expect(cell.isHit).toBe(true);
-      expect(cell.hit()).toBe(false);
     });
   });
 
@@ -31,7 +30,6 @@ describe('Tests for class Cell', () => {
       cell.hit();
       expect(cell.ship).not.toBe(null);
       expect(cell.isHit).toBe(true);
-      expect(cell.hit()).toBe(true);
     });
   });
 });

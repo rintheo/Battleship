@@ -6,8 +6,6 @@ export default class Cell {
 
   hit() {
     this.isHit = true;
-    if (this.ship === null) return false;
-    return true;
   }
 
   assign(ship) {
