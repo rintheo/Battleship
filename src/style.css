@@ -1,0 +1,109 @@
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+
+html, body,
+h1, h2, h3, h4, h5, h6, 
+p, ul, ol, li, button {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol, li {
+  list-style: none;
+} 
+
+a {
+  text-decoration: none;
+}
+
+.game {
+  height: 100vh;
+  width: 100vw;
+  background-image: url('./assets/ocean.gif');
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-auto-rows: 1fr;
+  justify-items: center;
+  align-items: center;
+  gap: 1rem
+}
+
+.gameboard {
+  position: relative;
+  width: 100%;
+  max-width: 750px;
+  aspect-ratio: 1;
+  background-color: rgba(255, 255, 255, 0.09);
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  align-items: center;
+}
+
+.cell {
+  aspect-ratio: 1;
+  background-color: rgba(8, 8, 20, 0.5);
+  color: green;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hit {
+  background-color: rgba(91, 0, 0, 0.5);
+}
+
+.targetable:hover {
+  background-color: rgba(3, 91, 0, 0.5);
+}
+
+/* .ship {
+  position: absolute;
+  transform: scale(0.4);
+}
+
+.ship:nth-child(1) {
+  top: 4rem;
+  left: 0;
+  animation: ship-idle 2s ease-in-out 0s infinite forwards alternate;
+}
+
+.ship:nth-child(2) {
+  top: 4rem;
+  left: 10rem;
+  animation: ship-idle 2.5s ease-in-out 0s infinite forwards alternate;
+}
+
+.ship:nth-child(3) {
+  top: 4rem;
+  left: 25rem;
+  animation: ship-idle 3s ease-in-out 0s infinite forwards alternate;
+}
+
+.ship:nth-child(4) {
+  top: 4rem;
+  left: 30rem;
+  animation: ship-idle 3.5s ease-in-out 0s infinite forwards alternate;
+}
+
+.ship:nth-child(5) {
+  top: 4rem;
+  left: 40rem;
+  animation: ship-idle 4s ease-in-out 0s infinite forwards alternate;
+}
+
+
+@keyframes ship-idle {
+  0% {
+    transform: scale(0.4) translate(-0.5rem, -0.25rem);
+  }
+
+  100% {
+    transform: scale(0.4) translate(0.5rem, 0.25rem);
+  }
+} */
