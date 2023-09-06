@@ -10,6 +10,10 @@ export default class GameBoard {
     return this.board;
   }
 
+  getFleet() {
+    return this.fleet;
+  }
+
   createBoard() {
     for (let i = 0; i < 10; i += 1) {
       this.board[i] = [];
@@ -24,6 +28,9 @@ export default class GameBoard {
       ? x - Math.floor(ship.length / 2)
       : y - Math.floor(ship.length / 2);
     const end = start + ship.length;
+    const bowCoordinates = isPlacedHorizontally
+      ? { x: end - 1, y }
+      : { x, y: end - 1 };
 
     if (ship.hasPositioned) return;
     if (start < 0 || end > 9) return;
@@ -37,14 +44,15 @@ export default class GameBoard {
       if (!isPlacedHorizontally) this.board[x][i].assign(ship);
     }
     this.fleet.push(ship);
-    ship.isPositioned();
+    ship.isPositioned(bowCoordinates, isPlacedHorizontally);
   }
 
-  receiveAttack([x, y]) {
+  receiveAttack([x, y], cb) {
     this.board[x][y].hit();
     if (this.board[x][y].ship !== null) {
       this.board[x][y].ship.hit();
     }
+    cb([x, y]);
   }
 
   isFleetOperational() {

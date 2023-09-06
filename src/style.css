@@ -1,9 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+:root {
+ --player-hp: 100%;
+ --player-hit: 100%;
+ --enemy-hp: 100%;
+ --enemy-hit: 100%;
+ --sprite-scale: 0.35;
+}
+
 *,
 *::after,
 *::before {
   box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
 }
-
 
 html, body,
 h1, h2, h3, h4, h5, h6, 
@@ -20,49 +30,213 @@ a {
   text-decoration: none;
 }
 
+.max-width {
+  width: 100%;
+  max-width: 1280px;
+}
+
+.settings-btn-container {
+  position: fixed;
+  top: 0;
+  height: 0;
+  width: 100%;
+  max-width: 1280px;
+  display: flex;
+  justify-content: end;
+  z-index: 2;
+  background-color: white;
+}
+
+.settings-btn {
+  display: block;
+  height: 1.5rem;
+  aspect-ratio: 1;
+  margin: 0.5rem;
+  fill: white;
+  background-color: transparent;
+  border: none;  
+  transition: 
+    transform 0.25s ease-in-out 0s,
+    fill 0.25s ease-in-out 0s;
+} 
+
+.settings-btn:hover {
+  fill: hsl(0, 0%, 90%);
+  transform: rotate(45deg);
+}
+
+.settings-btn:active {
+  fill: hsl(0, 0%, 80%);
+}
+
 .game {
-  height: 100vh;
+  height: 100%;
+  min-height: 100vh;
   width: 100vw;
   background-image: url('./assets/ocean.gif');
+  display: flex;
+  justify-content: center;
+}
+
+.boards {
+  height: 100%;
+  min-height: 100vh;
+  width: 100%;
+  padding: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-auto-rows: 1fr;
   justify-items: center;
   align-items: center;
-  gap: 1rem
+  gap: 1rem;
 }
 
-.gameboard {
+@media (max-width: 646px) {
+  .boards {
+    padding: 10rem 0.5rem;
+  }
+}
+
+.board {
   position: relative;
   width: 100%;
   max-width: 750px;
   aspect-ratio: 1;
-  background-color: rgba(255, 255, 255, 0.09);
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: repeat(10, 1fr);
   align-items: center;
 }
 
+.current.board {
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.target.board {
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
 .cell {
   aspect-ratio: 1;
-  background-color: rgba(8, 8, 20, 0.5);
-  color: green;
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: white;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  transition: background-color 0.1s ease-in-out 0s;
 }
 
-.hit {
-  background-color: rgba(91, 0, 0, 0.5);
+.current > .cell {
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
-.targetable:hover {
+
+.target > .cell {
+  background-color: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.target > .cell:hover {
   background-color: rgba(3, 91, 0, 0.5);
 }
 
-/* .ship {
+.current > .cell.miss,
+.current > .cell.hit,
+.target > .cell.hit {
+  background-color: rgba(255, 0, 0, 0.25);
+}
+
+.target > .cell.miss {
+  background-color: transparent;
+}
+
+.sprite-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.sprite-container.horizontal {
+  justify-self: end;
+  align-self: center;
+}
+
+.sprite {
+  position: absolute;
+  transform-origin: top center;
+  transform: scale(var(--sprite-scale));
+  animation: ship-idle 2s ease-in-out 0s infinite forwards alternate;
+}
+
+.horizontal .sprite {
+  transform: scale(var(--sprite-scale)) rotate(90deg);
+  animation: ship-idle-horizontal 2s ease-in-out 0s infinite forwards alternate;
+}
+
+
+.player-info {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  max-width: 30rem;
+  padding: 1rem;
+  transform: translate(-50%);
+  color: white;
+  z-index: 1;
+}
+
+.current.player-info {
+  top: 1rem;
+}
+
+.enemy.player-info {
+  bottom: 1rem;
+}
+
+.player-info div:first-child {
+  font-size: 0.9rem;
+}
+
+.player-info div:last-child {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.health-bar {
+  position: relative;
+  height: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  background-color: rgba(8, 8, 20, 0.5);
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+
+.health {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 1px black;
+}
+
+.bar {
+  height: 0.5rem;
+}
+
+.current .bar {
+  width: var(--player-hp);
+  background-color: rgba(0, 200, 0, 1);
+}
+
+.enemy .bar {
+  width: var(--enemy-hp);
+  background-color: rgba(200, 0, 0, 1);
+}
+
+/* .ship {Ohhd 
   position: absolute;
   transform: scale(0.4);
 }
@@ -95,15 +269,25 @@ a {
   top: 4rem;
   left: 40rem;
   animation: ship-idle 4s ease-in-out 0s infinite forwards alternate;
-}
+} */
 
 
 @keyframes ship-idle {
   0% {
-    transform: scale(0.4) translate(-0.5rem, -0.25rem);
+    transform: translate(-2.5%, 0.25%) scale(var(--sprite-scale));
   }
 
   100% {
-    transform: scale(0.4) translate(0.5rem, 0.25rem);
+    transform: translate(-0%, -0.25%) scale(var(--sprite-scale));
   }
-} */
+}
+
+@keyframes ship-idle-horizontal {
+  0% {
+    transform: translate(-2.5%, 0.25%) scale(var(--sprite-scale)) rotate(90deg);
+  }
+
+  100% {
+    transform: translate(-0%, -0.25%) scale(var(--sprite-scale)) rotate(90deg);
+  }
+}

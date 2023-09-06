@@ -66,15 +66,15 @@ const initGame = (inputPlayers) => {
     const board = new GameBoard();
     board.createBoard();
     player.assignBoard(board);
-    // console.log(player.data);
-    // console.log(player.data.board);
+    // console.log(player);
+    // console.log(player.board);
 
     ships.forEach((ship) => {
       player
         .board
-        .placeShip(ship.tempCoords, new Ship(ship.length), ship.tempHori);
+        .placeShip(ship.tempCoords, new Ship(ship.length, ship.type), ship.tempHori);
     });
-    // console.table(player.data.board.getBoard());
+    // console.table(player.board.getBoard());
   });
 };
 

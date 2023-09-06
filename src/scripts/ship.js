@@ -1,9 +1,12 @@
 export default class Ship {
-  constructor(length) {
+  constructor(length, type) {
     this.length = length;
     this.hits = 0;
     this.hasPositioned = false;
     this.hasSunk = false;
+    this.type = type;
+    this.bowCoordinates = null;
+    this.isHorizontal = null;
   }
 
   hit() {
@@ -15,7 +18,9 @@ export default class Ship {
     this.hasSunk = true;
   }
 
-  isPositioned() {
+  isPositioned(bowCoordinates, isHorizontal) {
     this.hasPositioned = true;
+    this.bowCoordinates = bowCoordinates;
+    this.isHorizontal = isHorizontal;
   }
 }

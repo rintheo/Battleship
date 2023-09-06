@@ -16,7 +16,7 @@
   \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ Ship)\n/* harmony export */ });\nclass Ship {\n  constructor(length) {\n    this.length = length;\n    this.hits = 0;\n    this.hasPositioned = false;\n    this.hasSunk = false;\n  }\n\n  hit() {\n    this.hits += 1;\n    if (this.length === this.hits) this.isSunk();\n  }\n\n  isSunk() {\n    this.hasSunk = true;\n  }\n\n  isPositioned() {\n    this.hasPositioned = true;\n  }\n}\n\n\n//# sourceURL=webpack://battleship/./src/scripts/ship.js?");
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ Ship)\n/* harmony export */ });\nclass Ship {\n  constructor(length, type) {\n    this.length = length;\n    this.hits = 0;\n    this.hasPositioned = false;\n    this.hasSunk = false;\n    this.type = type;\n    this.bowCoordinates = null;\n    this.isHorizontal = null;\n  }\n\n  hit() {\n    this.hits += 1;\n    if (this.length === this.hits) this.isSunk();\n  }\n\n  isSunk() {\n    this.hasSunk = true;\n  }\n\n  isPositioned(bowCoordinates, isHorizontal) {\n    this.hasPositioned = true;\n    this.bowCoordinates = bowCoordinates;\n    this.isHorizontal = isHorizontal;\n  }\n}\n\n\n//# sourceURL=webpack://battleship/./src/scripts/ship.js?");
 
 /***/ })
 
