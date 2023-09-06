@@ -5,7 +5,7 @@
  --player-hit: 100%;
  --enemy-hp: 100%;
  --enemy-hit: 100%;
- --fire-scale: 1;
+ --explosion-scale: 1;
  --sprite-scale: 0.35;
 }
 
@@ -44,7 +44,7 @@ a {
   max-width: 1280px;
   display: flex;
   justify-content: end;
-  z-index: 2;
+  z-index: 99;
   background-color: white;
 }
 
@@ -118,6 +118,7 @@ a {
 }
 
 .cell {
+  position: relative;
   aspect-ratio: 1;
   color: white;
   display: grid;
@@ -125,6 +126,11 @@ a {
   justify-items: center;
   align-items: start;
   transition: background-color 0.25s ease-in-out 0s;
+  z-index: 2;
+}
+
+.cell.ship-bow {
+  z-index: 1
 }
 
 .cell.miss svg {
@@ -191,8 +197,34 @@ a {
 .fire {
   position: absolute;
   pointer-events: none;
-  animation: fade-in 0.25s ease-in-out 0s 1 forwards normal;
-  /* animation: fire-idle 2s ease-in-out 0s infinite forwards alternate; */
+  animation: fade-in 1s ease-in-out 0s 1 forwards normal;
+}
+
+.explosion-container {
+  position: absolute;
+  top: 5%;
+  left: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  grid-area: a;
+  z-index: 2;  
+}
+
+.explosion {
+  position: absolute;
+  pointer-events: none;
+  transform: scale(var(--explosion-scale));
+}
+
+.blocker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 5;
 }
 
 .player-info {

@@ -47,12 +47,11 @@ export default class GameBoard {
     ship.isPositioned(bowCoordinates, isPlacedHorizontally);
   }
 
-  receiveAttack([x, y], cb) {
+  async receiveAttack([x, y]) {
     this.board[x][y].hit();
     if (this.board[x][y].ship !== null) {
       this.board[x][y].ship.hit();
     }
-    cb([x, y]);
   }
 
   isFleetOperational() {

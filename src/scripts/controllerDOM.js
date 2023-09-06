@@ -8,6 +8,7 @@ import spriteCruiser from '../assets/shipCruiser.png';
 import spriteDestroyer from '../assets/shipDestroyer.png';
 import spriteSubmarine from '../assets/shipSubmarine.png';
 import spriteFire from '../assets/fire.gif';
+import spriteExplosion from '../assets/explosion.gif';
 
 const shipSprites = [
   {
@@ -86,23 +87,58 @@ const initializeBoard = () => {
   printSprites();
 };
 
-const updateBoard = ([x, y]) => {
-  const targetCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+const hitExplosionEffect = async (targetCell) => {
+  const explosionContainer = document.createElement('div');
+  explosionContainer.classList.add('explosion-container');
 
+  const explosion = document.createElement('img');
+  explosion.src = `${spriteExplosion}?rand=${Math.random()}`;
+  explosion.classList.add('explosion');
+
+  const explosionScale = 1.5 * (parseInt(window.getComputedStyle(targetCell).width, 10) / 60);
+  document.documentElement.style.setProperty('--explosion-scale', explosionScale);
+
+  explosionContainer.appendChild(explosion);
+  targetCell.appendChild(explosionContainer);
+
+  setTimeout(() => {
+    targetCell.removeChild(explosionContainer);
+  }, 5000);
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1000);
+  });
+};
+
+const addFireEffect = (targetCell) => {
+  const fireContainer = document.createElement('div');
+  fireContainer.classList.add('fire-container');
+
+  const fire = document.createElement('img');
+  fire.src = `${spriteFire}?rand=${Math.random()}`;
+  fire.classList.add('fire');
+
+  fireContainer.appendChild(fire);
+  targetCell.appendChild(fireContainer);
+};
+
+const addMissMark = (targetCell) => {
+  const mark = document.createElement('svg');
+  targetCell.appendChild(mark);
+  mark.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>miss</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
+};
+
+const updateBoard = async ([x, y]) => {
+  const targetCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+  await hitExplosionEffect(targetCell);
   if (targetPlayer.board.getBoard()[x][y].ship) {
     targetCell.classList.add('hit');
-    const fireContainer = document.createElement('div');
-    fireContainer.classList.add('fire-container');
-    const fire = document.createElement('img');
-    fire.src = spriteFire;
-    fire.classList.add('fire');
-    fireContainer.appendChild(fire);
-    targetCell.appendChild(fireContainer);
+    addFireEffect(targetCell);
   } else {
     targetCell.classList.add('miss');
-    const mark = document.createElement('svg');
-    targetCell.appendChild(mark);
-    mark.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>miss</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
+    addMissMark(targetCell);
   }
 };
 
@@ -110,6 +146,7 @@ const printSprites = () => {
   currentPlayer.board.getFleet().forEach((ship) => {
     const { x, y } = ship.bowCoordinates;
     const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+    bowCell.classList.add('ship-bow');
 
     const spriteContainer = document.createElement('div');
     spriteContainer.classList.add('sprite-container');
@@ -127,21 +164,38 @@ const printSprites = () => {
   });
 };
 
-const processHit = () => {
+const showInputBlocker = () => {
+  const blocker = document.createElement('div');
+  blocker.classList.add('blocker');
+
+  const game = document.querySelector('.game');
+  game.appendChild(blocker);
+};
+
+const hideInputBlocker = () => {
+  const blocker = document.querySelector('.blocker');
+  const game = document.querySelector('.game');
+  game.removeChild(blocker);
+};
+
+const processHit = async () => {
   if (checkWinningCondition()) return;
   switchPlayers();
   if (currentPlayer instanceof AI) {
+    const attackCoordinatinates = currentPlayer.chooseAttackCoordinates(targetPlayer);
     targetPlayer
       .board
       .receiveAttack(
-        currentPlayer.chooseAttackCoordinates(targetPlayer),
-        updateBoard,
+        attackCoordinatinates,
       );
+    await updateBoard(attackCoordinatinates);
     processHit();
+  } else {
+    hideInputBlocker();
   }
 };
 
-const hitCell = (e) => {
+const hitCell = async (e) => {
   const cell = e.currentTarget;
   const { x } = cell.dataset;
   const { y } = cell.dataset;
@@ -153,8 +207,9 @@ const hitCell = (e) => {
       .board
       .receiveAttack(
         [x, y],
-        updateBoard,
       );
+    showInputBlocker();
+    await updateBoard([x, y]);
     processHit();
   }
 };
