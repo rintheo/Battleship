@@ -7,6 +7,7 @@ import spriteCarrier from '../assets/shipCarrier.png';
 import spriteCruiser from '../assets/shipCruiser.png';
 import spriteDestroyer from '../assets/shipDestroyer.png';
 import spriteSubmarine from '../assets/shipSubmarine.png';
+import spriteFire from '../assets/fire.gif';
 
 const shipSprites = [
   {
@@ -73,12 +74,6 @@ const initializeBoard = () => {
         cell.dataset.y = i;
         cell.dataset.playerName = player.name;
         if (
-          player.board.getBoard()[j][i].ship
-          && player === targetPlayer
-        ) {
-          cell.textContent = player.board.getBoard()[j][i].ship.length;
-        }
-        if (
           player === targetPlayer
           && currentPlayer instanceof Player
           && !(currentPlayer instanceof AI)
@@ -93,10 +88,21 @@ const initializeBoard = () => {
 
 const updateBoard = ([x, y]) => {
   const targetCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+
   if (targetPlayer.board.getBoard()[x][y].ship) {
     targetCell.classList.add('hit');
+    const fireContainer = document.createElement('div');
+    fireContainer.classList.add('fire-container');
+    const fire = document.createElement('img');
+    fire.src = spriteFire;
+    fire.classList.add('fire');
+    fireContainer.appendChild(fire);
+    targetCell.appendChild(fireContainer);
   } else {
     targetCell.classList.add('miss');
+    const mark = document.createElement('svg');
+    targetCell.appendChild(mark);
+    mark.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>miss</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
   }
 };
 
