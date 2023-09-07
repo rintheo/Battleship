@@ -107,7 +107,7 @@ const initializeBoard = () => {
           player === targetPlayer
           && currentPlayer instanceof Player
           && !(currentPlayer instanceof AI)
-        ) cell.addEventListener('click', hitCell);
+        ) cell.addEventListener('click', hitCellPlayer);
         board.appendChild(cell);
       }
     }
@@ -207,25 +207,27 @@ const hideInputBlocker = () => {
   game.removeChild(blocker);
 };
 
-const processHit = async () => {
+const processHit = async ([x, y]) => {
+  targetPlayer
+    .board
+    .receiveAttack(
+      [x, y],
+    );
+  showInputBlocker();
+  await updateBoard([x, y]);
+  if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
   if (checkWinningCondition()) return;
   switchPlayers();
-  if (currentPlayer instanceof AI) {
-    const [x, y] = currentPlayer.chooseAttackCoordinates(targetPlayer);
-    targetPlayer
-      .board
-      .receiveAttack(
-        [x, y],
-      );
-    await updateBoard([x, y]);
-    if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
-    processHit();
-  } else {
-    hideInputBlocker();
-  }
+  if (currentPlayer instanceof AI) hitCellAI();
+  hideInputBlocker();
 };
 
-const hitCell = async (e) => {
+const hitCellAI = () => {
+  const [x, y] = currentPlayer.chooseAttackCoordinates(targetPlayer);
+  processHit([x, y]);
+};
+
+const hitCellPlayer = (e) => {
   const cell = e.currentTarget;
   const { x } = cell.dataset;
   const { y } = cell.dataset;
@@ -233,15 +235,7 @@ const hitCell = async (e) => {
     cell.dataset.playerName === targetPlayer.name
     && !targetPlayer.board.getBoard()[x][y].isHit
   ) {
-    targetPlayer
-      .board
-      .receiveAttack(
-        [x, y],
-      );
-    showInputBlocker();
-    await updateBoard([x, y]);
-    if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
-    processHit();
+    processHit([x, y]);
   }
 };
 
