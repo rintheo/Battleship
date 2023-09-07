@@ -126,6 +126,7 @@ a {
   justify-items: center;
   align-items: start;
   transition: background-color 0.25s ease-in-out 0s;
+  user-select: none;
   z-index: 2;
 }
 
