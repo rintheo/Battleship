@@ -1,10 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 :root {
- --player-hp: 100%;
- --player-hit: 100%;
- --enemy-hp: 100%;
- --enemy-hit: 100%;
+ --current-health: 100%;
+ --current-hit: 0%;
+ --current-empty: 0%;
+ --enemy-health: 100%;
+ --enemy-hit: 0%;
+ --enemy-empty: 0%;
  --explosion-scale: 1;
  --sprite-scale: 0.35;
 }
@@ -256,7 +258,7 @@ a {
   font-weight: 600;
 }
 
-.health-bar {
+.health {
   position: relative;
   height: 1rem;
   width: 100%;
@@ -268,7 +270,7 @@ a {
   align-items: center;
 }
 
-.health {
+.health > .text {
   position: absolute;
   left: 50%;
   transform: translate(-50%);
@@ -277,18 +279,41 @@ a {
   text-shadow: 1px 1px 1px black;
 }
 
-.bar {
+.health > .bar,
+.health > .hit,
+.health > .empty {
   height: 0.5rem;
+  transition: width 0.25s ease-in-out 0s;
 }
 
-.current .bar {
-  width: var(--player-hp);
+.current .health > .bar {
+  width: var(--current-health);
   background-color: rgba(0, 200, 0, 1);
 }
 
-.enemy .bar {
-  width: var(--enemy-hp);
+.current .health > .hit {
+  width: var(--current-hit);
+  background-color: rgba(0, 200, 0, 0.5);
+}
+
+.current .health > .empty {
+  width: var(--current-empty);
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.enemy .health > .bar {
+  width: var(--enemy-health);
   background-color: rgba(200, 0, 0, 1);
+}
+
+.enemy .health > .hit {
+  width: var(--enemy-hit);
+  background-color: rgba(200, 0, 0, 0.5);
+}
+
+.enemy .health > .empty {
+  width: var(--enemy-empty);
+  background-color: rgba(0, 0, 0, 0.25);
 }
 
 @keyframes fade-in {

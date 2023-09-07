@@ -52,6 +52,35 @@ const checkWinningCondition = () => {
   return false;
 };
 
+const updateHP = () => {
+  const player = targetPlayer === players[0]
+    ? 'current'
+    : 'enemy';
+  const totalHP = targetPlayer
+    .board
+    .fleet
+    .reduce((total, ship) => total + ship.length, 0);
+  const currentHP = targetPlayer
+    .board
+    .fleet
+    .reduce((total, ship) => total - ship.hits, totalHP);
+  const health = `${Math.round((currentHP / totalHP) * 100)}%`;
+  const hit = `${Math.round((1 / 17) * 100)}%`;
+  const empty = `${Math.round((1 - currentHP / totalHP) * 100)}%`;
+
+  const playerHealthText = document.querySelector(`.${player} .health > .text `);
+  playerHealthText.textContent = `${currentHP}/${totalHP}`;
+
+  document.documentElement.style.setProperty(`--${player}-health`, health);
+  document.documentElement.style.setProperty(`--${player}-hit`, hit);
+
+  const playerHealthBar = document.querySelector(`.${player} .health > .bar `);
+  playerHealthBar.addEventListener('transitionend', () => {
+    document.documentElement.style.setProperty(`--${player}-hit`, '0%');
+    document.documentElement.style.setProperty(`--${player}-empty`, empty);
+  }, { once: true });
+};
+
 const clearBoard = () => {
   const boards = document.querySelector('.boards');
   while (boards.firstChild) {
@@ -182,13 +211,14 @@ const processHit = async () => {
   if (checkWinningCondition()) return;
   switchPlayers();
   if (currentPlayer instanceof AI) {
-    const attackCoordinatinates = currentPlayer.chooseAttackCoordinates(targetPlayer);
+    const [x, y] = currentPlayer.chooseAttackCoordinates(targetPlayer);
     targetPlayer
       .board
       .receiveAttack(
-        attackCoordinatinates,
+        [x, y],
       );
-    await updateBoard(attackCoordinatinates);
+    await updateBoard([x, y]);
+    if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
     processHit();
   } else {
     hideInputBlocker();
@@ -210,6 +240,7 @@ const hitCell = async (e) => {
       );
     showInputBlocker();
     await updateBoard([x, y]);
+    if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
     processHit();
   }
 };
