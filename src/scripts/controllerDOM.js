@@ -39,9 +39,6 @@ let targetPlayer = players[1];
 const switchPlayers = () => {
   currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
   targetPlayer = targetPlayer === players[0] ? players[1] : players[0];
-
-  // console.log(`Current Player: ${currentPlayer.name}`);
-  // console.log(`Target Player: ${targetPlayer.name}`);
 };
 
 const checkWinningCondition = () => {
@@ -52,7 +49,51 @@ const checkWinningCondition = () => {
   return false;
 };
 
+const selectShipObject = (player, cell) => {
+  const [selectedShip] = player
+    .board
+    .fleet
+    .filter((ship) => ship.type === cell.dataset.ship);
+  return selectedShip;
+};
+
+const ifSunkExplosion = (cell) => {
+  const targetCell = cell;
+  if (targetCell.dataset.ship) {
+    const targetShip = selectShipObject(targetPlayer, targetCell);
+    if (targetShip.hasSunk) {
+      const array = [
+        [
+          +targetCell.dataset.x + 1,
+          +targetCell.dataset.y,
+        ],
+        [
+          +targetCell.dataset.x - 1,
+          +targetCell.dataset.y,
+        ],
+        [
+          +targetCell.dataset.x,
+          +targetCell.dataset.y + 1,
+        ],
+        [
+          +targetCell.dataset.x,
+          +targetCell.dataset.y - 1,
+        ],
+      ];
+      targetCell.dataset.ship = '';
+      targetCell.classList.add('sunk');
+
+      array.forEach(([x, y]) => {
+        const nextCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"][data-ship="${targetShip.type}"]`);
+        if (nextCell) hitExplosionEffect(nextCell);
+      });
+    }
+  }
+};
+
 const hitExplosionEffect = async (targetCell) => {
+  ifSunkExplosion(targetCell);
+
   const explosionContainer = document.createElement('div');
   explosionContainer.classList.add('explosion-container');
 
@@ -73,7 +114,7 @@ const hitExplosionEffect = async (targetCell) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
-    }, 1000);
+    }, 500);
   });
 };
 
@@ -126,10 +167,16 @@ const updateHP = () => {
 
 const updateBoard = async ([x, y]) => {
   const targetCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+  if (targetPlayer.board.getBoard()[x][y].ship) {
+    const targetShip = selectShipObject(targetPlayer, targetCell);
+    if (targetShip.hasSunk) {
+      printSinkingSprite(targetShip);
+    }
+  }
   await hitExplosionEffect(targetCell);
   if (targetPlayer.board.getBoard()[x][y].ship) {
     targetCell.classList.add('hit');
-    addFireEffect(targetCell);
+    if (targetCell.dataset.ship) addFireEffect(targetCell);
   } else {
     targetCell.classList.add('miss');
     addMissMark(targetCell);
@@ -182,10 +229,32 @@ const hitCellPlayer = (e) => {
   }
 };
 
+const printSinkingSprite = (targetShip) => {
+  const { x, y } = targetShip.bowCoordinates;
+  const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+  const bowCellChildren = Array.from(bowCell.childNodes);
+  if (bowCellChildren.some((child) => child.classList.contains('sprite-container'))) return;
+  bowCell.classList.add('ship-bow');
+
+  const spriteContainer = document.createElement('div');
+  spriteContainer.classList.add('sprite-container');
+  if (targetShip.isHorizontal) spriteContainer.classList.add('horizontal');
+
+  const shipSprite = document.createElement('img');
+  shipSprite.src = shipSprites.find((sprite) => sprite.type === targetShip.type).src;
+  shipSprite.classList.add('sprite');
+
+  const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
+  document.documentElement.style.setProperty('--sprite-scale', spriteScale);
+
+  spriteContainer.appendChild(shipSprite);
+  bowCell.appendChild(spriteContainer);
+};
+
 const printSprites = () => {
   currentPlayer.board.getFleet().forEach((ship) => {
     const { x, y } = ship.bowCoordinates;
-    const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+    const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${currentPlayer.name}"]`);
     bowCell.classList.add('ship-bow');
 
     const spriteContainer = document.createElement('div');
@@ -232,6 +301,9 @@ const initializeBoard = () => {
         cell.dataset.x = j;
         cell.dataset.y = i;
         cell.dataset.playerName = player.name;
+        cell.dataset.ship = player.board.getBoard()[j][i].ship
+          ? player.board.getBoard()[j][i].ship.type
+          : '';
         if (
           player === targetPlayer
           && currentPlayer instanceof Player
@@ -248,6 +320,3 @@ const initializeBoard = () => {
 window.addEventListener('resize', resizeSprites);
 
 initializeBoard();
-
-// console.log(`Current Player: ${currentPlayer.name}`);
-// console.log(`Target Player: ${targetPlayer.name}`);

@@ -159,6 +159,7 @@ a {
   background-color: rgba(255, 0, 0, 0.25);
 }
 
+.target > .cell.sunk,
 .target > .cell.miss {
   background-color: transparent;
 }
@@ -187,6 +188,18 @@ a {
   animation: ship-idle-horizontal 2s ease-in-out 0s infinite forwards alternate;
 }
 
+.cell.sunk .sprite {
+  animation: 
+    ship-sink 10s linear 0s 1 forwards normal,
+    ship-shaking 0.5s ease-in-out 0s infinite forwards alternate;
+}
+
+.cell.sunk .horizontal .sprite {
+  animation: 
+    ship-sink 10s linear 0s 1 forwards normal,
+    ship-shaking-horizontal 0.5s ease-in-out 0s infinite forwards alternate;
+}
+
 .fire-container {
   position: relative;
   display: flex;
@@ -201,6 +214,10 @@ a {
   position: absolute;
   pointer-events: none;
   animation: fade-in 1s ease-in-out 0s 1 forwards normal;
+}
+
+.cell.sunk .fire {
+  animation: fade-out 1s ease-in-out 0s 1 forwards normal;
 }
 
 .explosion-container {
@@ -326,6 +343,16 @@ a {
   }
 }
 
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes ship-idle {
   0% {
     transform: translate(-2.5%, 0.25%) scale(var(--sprite-scale));
@@ -345,3 +372,41 @@ a {
     transform: translate(-0%, -0.25%) scale(var(--sprite-scale)) rotate(90deg);
   }
 }
+
+@keyframes ship-sink {
+  0% {
+    filter: blur(0px) brightness(1) grayscale(0%) opacity(1);
+  }
+
+  2.5% {
+    filter: blur(0px) brightness(2) grayscale(0%) opacity(1);
+  }
+
+  5% {
+    filter: blur(0px) brightness(1) grayscale(0%) opacity(1);
+  }
+  
+  100% {
+    filter: blur(25px) brightness(0.5) grayscale(100%) opacity(0.25);
+  }
+}
+
+@keyframes ship-shaking {
+ 0% {
+  transform: translate(-0.5%, 0) scale(var(--sprite-scale));
+ }
+
+ 100% {
+  transform: translate(0.5%, 0) scale(var(--sprite-scale));
+ }
+}
+
+@keyframes ship-shaking-horizontal {
+  0% {
+   transform: translate(0, -0.05%) scale(var(--sprite-scale)) rotate(90deg);
+  }
+ 
+  100% {
+   transform: translate(0, 0.05%) scale(var(--sprite-scale)) rotate(90deg);
+  }
+ }
