@@ -267,11 +267,11 @@ a {
   bottom: 1rem;
 }
 
-.player-info div:first-child {
+.player-info p:first-child {
   font-size: 0.9rem;
 }
 
-.player-info div:last-child {
+.player-info p:last-child {
   font-size: 1.5rem;
   font-weight: 600;
 }

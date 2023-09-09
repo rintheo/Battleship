@@ -374,6 +374,56 @@ const initializeBoard = () => {
   printSprites();
 };
 
+const initializePlayerHP = () => {
+  const game = document.querySelector('.game');
+  players.forEach((player) => {
+    const tag = currentPlayer === player ? 'current' : 'enemy';
+
+    const playerInfo = document.createElement('div');
+    playerInfo.classList.add(tag, 'player-info');
+
+    const p1 = document.createElement('p');
+    p1.textContent = 'Allied fleet';
+
+    const health = document.createElement('div');
+    health.classList.add('health');
+
+    const totalHP = player
+      .board
+      .fleet
+      .reduce((total, ship) => total + ship.length, 0);
+    const text = document.createElement('p');
+    text.classList.add('text');
+    text.textContent = `${totalHP}/${totalHP}`;
+
+    const bar = document.createElement('div');
+    bar.classList.add('bar');
+
+    const hit = document.createElement('div');
+    hit.classList.add('hit');
+
+    const empty = document.createElement('div');
+    empty.classList.add('empty');
+
+    const p2 = document.createElement('p');
+    p2.textContent = player.name;
+
+    health.appendChild(text);
+    health.appendChild(bar);
+    health.appendChild(hit);
+    health.appendChild(empty);
+    playerInfo.appendChild(p1);
+    playerInfo.appendChild(health);
+    playerInfo.appendChild(p2);
+    game.appendChild(playerInfo);
+  });
+};
+
+const initializeGame = () => {
+  initializePlayerHP();
+  initializeBoard();
+};
+
 const resumeGame = () => {
   returnFocusToGame();
   hideDialog();
@@ -423,4 +473,4 @@ pauseMenuButton.addEventListener('click', clickPauseMenu);
 
 window.addEventListener('resize', resizeSprites);
 
-initializeBoard();
+initializeGame();
