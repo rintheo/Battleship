@@ -46,6 +46,24 @@ const loseFocusFromGame = () => {
   game.classList.add('lose-focus');
 };
 
+const returnFocusToGame = () => {
+  const game = document.querySelector('.game');
+  game.classList.remove('lose-focus');
+  game.classList.add('return-focus');
+  game.addEventListener('animationend', () => {
+    game.classList.remove('return-focus');
+  }, { once: true });
+};
+
+const hideDialog = () => {
+  const dialogOverlay = document.querySelector('.dialog-overlay');
+  dialogOverlay.classList.add('fade-out');
+  dialogOverlay.addEventListener('animationend', () => {
+    dialogOverlay.classList.remove('fade-out');
+    dialogOverlay.remove();
+  }, { once: true });
+};
+
 const showWinnerDialog = () => {
   const siteContainer = document.querySelector('.site-container');
 
@@ -355,6 +373,53 @@ const initializeBoard = () => {
   });
   printSprites();
 };
+
+const resumeGame = () => {
+  returnFocusToGame();
+  hideDialog();
+};
+
+const showPauseMenu = () => {
+  const siteContainer = document.querySelector('.site-container');
+
+  const dialogOverlay = document.createElement('div');
+  dialogOverlay.classList.add('dialog-overlay');
+
+  const dialogBox = document.createElement('div');
+  dialogBox.classList.add('dialog');
+
+  const p = document.createElement('p');
+  p.textContent = 'Game paused';
+  p.classList.add('main', 'text');
+
+  const btnResume = document.createElement('button');
+  btnResume.classList.add('button');
+  btnResume.textContent = 'Resume';
+  btnResume.addEventListener('click', resumeGame);
+
+  const btnRestart = document.createElement('button');
+  btnRestart.classList.add('button');
+  btnRestart.textContent = 'Restart';
+
+  const btnMenuReturn = document.createElement('button');
+  btnMenuReturn.classList.add('button');
+  btnMenuReturn.textContent = 'Return to Menu';
+
+  dialogBox.appendChild(p);
+  dialogBox.appendChild(btnResume);
+  dialogBox.appendChild(btnRestart);
+  dialogBox.appendChild(btnMenuReturn);
+  dialogOverlay.appendChild(dialogBox);
+  siteContainer.appendChild(dialogOverlay);
+};
+
+const clickPauseMenu = () => {
+  loseFocusFromGame();
+  showPauseMenu();
+};
+
+const pauseMenuButton = document.querySelector('.settings-btn');
+pauseMenuButton.addEventListener('click', clickPauseMenu);
 
 window.addEventListener('resize', resizeSprites);
 

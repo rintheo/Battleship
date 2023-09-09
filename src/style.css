@@ -362,6 +362,7 @@ a {
   align-items: center;
   text-align: center;
   animation: fade-in 0.25s ease-in-out 0s 1 forwards normal;
+  user-select: none;
 }
 
 .dialog .text {
@@ -420,8 +421,16 @@ a {
   background-color: hsl(6, 63%, 52%);
 }
 
+.fade-out {
+  animation: fade-out 0.25s ease-in-out 0s 1 forwards normal;
+}
+
 .lose-focus {
   animation: lose-focus 1s ease-in-out 0s 1 forwards normal;
+}
+
+.return-focus {
+  animation: return-focus 1s ease-in-out 0s 1 forwards normal;
 }
 
 .display-none {
@@ -435,6 +444,16 @@ a {
   
   100% {
     filter: blur(2px);
+  }
+}
+
+@keyframes return-focus {
+  0% {
+    filter: blur(2px);
+  }
+  
+  100% {
+    filter: blur(0);
   }
 }
 
