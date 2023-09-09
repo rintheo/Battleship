@@ -41,9 +41,48 @@ const switchPlayers = () => {
   targetPlayer = targetPlayer === players[0] ? players[1] : players[0];
 };
 
+const loseFocusFromGame = () => {
+  const game = document.querySelector('.game');
+  game.classList.add('lose-focus');
+};
+
+const showWinnerDialog = () => {
+  const siteContainer = document.querySelector('.site-container');
+
+  const dialogOverlay = document.createElement('div');
+  dialogOverlay.classList.add('dialog-overlay');
+
+  const dialogBox = document.createElement('div');
+  dialogBox.classList.add('dialog');
+
+  const p1 = document.createElement('p');
+  p1.classList.add('sub', 'text');
+  p1.textContent = 'All enemy ships destroyed.';
+
+  const p2 = document.createElement('p');
+  p2.textContent = `${currentPlayer.name} wins!`;
+  p2.classList.add('main', 'text');
+
+  const btnPlayAgain = document.createElement('button');
+  btnPlayAgain.classList.add('play', 'button');
+  btnPlayAgain.textContent = 'Play Again';
+
+  const btnMenuReturn = document.createElement('button');
+  btnMenuReturn.classList.add('menu', 'button');
+  btnMenuReturn.textContent = 'Return to Menu';
+
+  dialogBox.appendChild(p1);
+  dialogBox.appendChild(p2);
+  dialogBox.appendChild(btnPlayAgain);
+  dialogBox.appendChild(btnMenuReturn);
+  dialogOverlay.appendChild(dialogBox);
+  siteContainer.appendChild(dialogOverlay);
+};
+
 const checkWinningCondition = () => {
   if (!targetPlayer.board.isFleetOperational()) {
-    alert(`${currentPlayer.name} wins!`);
+    loseFocusFromGame();
+    showWinnerDialog();
     return true;
   }
   return false;

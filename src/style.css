@@ -255,7 +255,8 @@ a {
   padding: 1rem;
   transform: translate(-50%);
   color: white;
-  z-index: 1;
+  z-index: 50;
+  pointer-events: none;
 }
 
 .current.player-info {
@@ -331,6 +332,110 @@ a {
 .enemy .health > .empty {
   width: var(--enemy-empty);
   background-color: rgba(0, 0, 0, 0.25);
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: hsla(0, 0%, 0%, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 300px;
+  margin: 1rem;
+  padding: 2rem 1rem;
+  background-color: rgba(44, 62, 80, 0.5);
+  border-radius: 1rem;
+  color: white;
+  outline: 2px ridge #95a5a6;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fade-in 0.25s ease-in-out 0s 1 forwards normal;
+}
+
+.dialog .text {
+  text-shadow: 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+.dialog .main.text {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.dialog .button {
+  width: 10rem;
+  margin: 0.25rem;
+  padding: 0.5rem;
+  background-color: #7f8c8d;
+  color: white;
+  border: 1px outset #7f8c8d;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dialog .button:hover {
+  background-color: hsl(184, 6%, 56%);
+}
+
+.dialog .button:active {
+  background-color: hsl(184, 6%, 59%);
+}
+
+.dialog .play.button {
+  background-color: #27ae60;
+  border: 1px outset #27ae60;
+}
+
+.dialog .play.button:hover {
+  background-color: hsla(145, 63%, 45%);
+}
+
+.dialog .play.button:active {
+  background-color: hsla(145, 63%, 48%);
+}
+
+.dialog .menu.button {
+  background-color: #c0392b;
+  border: 1px outset #c0392b;
+}
+
+.dialog .menu:hover {
+  background-color: hsl(6, 63%, 49%);
+}
+
+.dialog .menu:active {
+  background-color: hsl(6, 63%, 52%);
+}
+
+.lose-focus {
+  animation: lose-focus 1s ease-in-out 0s 1 forwards normal;
+}
+
+.display-none {
+  display: none;
+}
+
+@keyframes lose-focus {
+  0% {
+    filter: blur(0);
+  }
+  
+  100% {
+    filter: blur(2px);
+  }
 }
 
 @keyframes fade-in {
