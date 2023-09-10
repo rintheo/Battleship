@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Rubik+Iso&display=swap');
 
 :root {
  --current-health: 100%;
@@ -334,6 +334,180 @@ a {
   background-color: rgba(0, 0, 0, 0.25);
 }
 
+.site-container {
+  position: relative;
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+.main-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-menu > h1 {
+  margin-top: auto;
+  margin-bottom: 2rem;
+  color: white;
+  font-family: 'Rubik Iso', cursive;
+  font-size: 6rem;
+  text-shadow: 3px 3px 1px rgba(0, 0, 0, 0.25);
+  animation: 
+    title-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+  user-select: none;
+}
+
+.main-menu .buttons {
+  height: 15rem;
+  margin-bottom: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-menu.click-sink,
+.main-menu .buttons.click-sink {
+  animation:
+    title-sink 0.25s ease-in-out 0s 1 forwards normal;
+}
+
+.main-menu .button {
+  width: 15rem;
+  padding: 0.5rem;
+  background: none;
+  color: white;
+  border: none;
+  font-size: 2rem;
+  font-weight: 600;
+  text-shadow: 3px 3px 1px rgba(0, 0, 0, 0.25);
+  transition: 0.25s;
+  animation: 
+    button-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+  user-select: none;
+}
+
+.main-menu .button:hover {
+  color: hsl(0, 0%, 90%);
+  background-color: hsla(0, 0%, 100%, 0.1);
+  border-radius: 2rem;
+}
+
+.main-menu .button:active {
+  color: hsl(0, 0%, 80%);
+}
+
+.main-menu form li {
+  margin-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: 6rem;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  justify-items: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.main-menu form li:last-child {
+  margin-top: 2rem;
+  grid-template-columns: 1fr;
+}
+
+.main-menu form li .label {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-shadow: 3px 3px 1px rgba(0, 0, 0, 0.25);
+  user-select: none;
+  animation: 
+    button-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+}
+
+.main-menu form li input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px groove #7f8c8d;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+  animation: 
+    button-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+}
+
+.main-menu form li .button.AI {
+  width: 100%;
+  background-color: #7f8c8d;
+  border: 2px outset #7f8c8d;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+  text-shadow: none;
+  user-select: none;
+}
+
+.main-menu form li .button.AI.toggled {
+  background-color: hsl(0, 6%, 45%);   
+  border: 2px inset hsl(0, 6%, 45%);   
+}
+
+.main-menu form li .button.AI.toggled:hover {
+  background-color: hsl(184, 6%, 50%);   
+  border: 2px inset hsl(184, 6%, 50%);   
+}
+
+.main-menu form li .button.AI.toggled:active {
+  background-color: hsl(184, 6%, 47%);
+}
+
+.main-menu form li .button.AI:hover {
+  background-color: hsl(184, 6%, 50%);   
+}
+
+.main-menu form li .button.AI:active {
+  background-color: hsl(184, 6%, 47%);   
+  border: 2px inset hsl(184, 6%, 47%);  
+}
+
+.copyright {
+  color: white;
+  text-align: center;
+  text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.25);
+  font-size: 0.8rem;
+  margin-bottom: 2rem;
+  animation: 
+    title-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+  user-select: none;
+  line-height: 1.8rem;
+}
+
+.copyright svg {
+  vertical-align: bottom;
+  fill: white;
+  height: 1.8rem;
+  transition: 
+    transform 0.25s ease-in-out 0s,
+    fill 0.25s ease-in-out 0s;
+}
+
+.copyright svg:hover {
+  color: hsl(0, 0%, 80%);
+  transform: rotate(360deg) scale(1.1);
+}
+
+.copyright svg:active {
+  fill: hsl(0, 0%, 70%);
+}
+
 .dialog-overlay {
   position: fixed;
   top: 0;
@@ -348,8 +522,7 @@ a {
 }
 
 .dialog {
-  width: 100%;
-  max-width: 300px;
+  min-width: 300px;
   margin: 1rem;
   padding: 2rem 1rem;
   background-color: rgba(44, 62, 80, 0.5);
@@ -474,6 +647,46 @@ a {
 
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes button-idle {
+  0% {
+    transform: translate(-5px, 0);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes title-idle {
+  0% {
+    transform: translate(-1%, 0.25%);
+  }
+
+  100% {
+    transform: translate(-0%, -0.25%);
+  }
+}
+
+@keyframes title-rise {
+  0% {
+    filter: blur(10px) brightness(0.25) opacity(0.25);
+  }
+
+  100% {
+    filter: blur(0px) brightness(1) opacity(1);
+  }
+}
+
+@keyframes title-sink {
+  0% {
+    filter: blur(0px) brightness(1) opacity(1);
+  }
+
+  100% {
+    filter: blur(10px) brightness(0.25) opacity(0.25);
   }
 }
 

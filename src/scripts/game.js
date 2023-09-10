@@ -3,22 +3,7 @@ import AI from './player/ai';
 import GameBoard from './gameBoard';
 import Ship from './ship';
 
-const players = [];
-
-const temporaryPlayerInput = [
-  {
-    index: 0,
-    type: 'human',
-    name: 'Player 1',
-    data: null,
-  },
-  {
-    index: 1,
-    type: 'AI',
-    difficulty: 'Easy',
-    data: null,
-  },
-];
+export const players = [];
 
 const ships = [
   {
@@ -53,8 +38,8 @@ const ships = [
   },
 ];
 
-const initGame = (inputPlayers) => {
-  // temp generate human player and AI easy player
+export const generatePlayers = (inputPlayers) => {
+  players.length = 0;
 
   inputPlayers.forEach((thisPlayer) => {
     const player = thisPlayer.type === 'human' ? new Player(thisPlayer.name)
@@ -66,19 +51,11 @@ const initGame = (inputPlayers) => {
     const board = new GameBoard();
     board.createBoard();
     player.assignBoard(board);
-    // console.log(player);
-    // console.log(player.board);
 
     ships.forEach((ship) => {
       player
         .board
         .placeShip(ship.tempCoords, new Ship(ship.length, ship.type), ship.tempHori);
     });
-    // console.table(player.board.getBoard());
   });
 };
-
-initGame(temporaryPlayerInput);
-// console.log(players);
-
-export default players;
