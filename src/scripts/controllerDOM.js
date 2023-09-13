@@ -80,7 +80,9 @@ const showWinnerDialog = () => {
 
   const p1 = document.createElement('p');
   p1.classList.add('sub', 'text');
-  p1.textContent = 'All enemy ships destroyed.';
+  p1.textContent = currentPlayer instanceof AI
+    ? 'All your ships have been destroyed.'
+    : 'All enemy ships have been destroyed.';
 
   const p2 = document.createElement('p');
   p2.textContent = `${currentPlayer.name} wins!`;
