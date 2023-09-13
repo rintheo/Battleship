@@ -9,6 +9,7 @@
  --enemy-empty: 0%;
  --explosion-scale: 1;
  --sprite-scale: 0.35;
+ --placement-cell-width: 48px;
 }
 
 *,
@@ -78,13 +79,12 @@ a {
   width: 100vw;
   background-image: url('./assets/ocean.gif');
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
 .boards {
-  height: 100%;
-  min-height: 100vh;
-  width: 100%;
   padding: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -95,7 +95,7 @@ a {
 }
 
 @media (max-width: 646px) {
-  .boards {
+  .boards:not(.placement) {
     padding: 10rem 0.5rem;
   }
 }
@@ -109,6 +109,100 @@ a {
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: repeat(10, 1fr);
   align-items: center;
+  animation: title-rise 1s ease-in-out 0s 1 forwards normal;
+}
+
+.placement .board {
+  margin-top: 12rem;
+  max-width: 480px;
+}
+
+.placement.info {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  width: 100%;
+  max-width: 640px;
+  padding: 1rem;
+  transform: translate(-50%);
+  display: flex;
+  flex-direction: column;
+  animation: title-rise 1s ease-in-out 0s 1 forwards normal;
+}
+
+.placement.info p {
+  color: white;
+  font-weight: 600;
+  text-shadow: 3px 3px 1px rgba(0, 0, 0, 0.25);
+  transition: 0.25s;
+  animation: button-idle 2s ease-in-out 0s infinite forwards alternate;
+  user-select: none;
+}
+
+.placement.info p:nth-child(1) {
+  font-size: 2rem;
+}
+
+.placement.info p:nth-child(3) {
+  margin: 1.5rem 0 ;
+}
+
+.placement.info .ships {
+  align-self: center;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem var(--placement-cell-width);
+
+}
+
+.placement.info .ships .container {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--placement-cell-width);
+  justify-content: start;
+  align-items: center;
+}
+
+.placement .sprite{
+  transition: 0.1s;
+  pointer-events: none;
+}
+
+/* make sprite style common */
+
+.placement .cell.hover .sprite,
+.placement .container.unplaced:hover .sprite {
+  filter: grayscale(100%) sepia(100%) brightness(0.75) hue-rotate(60deg);
+}
+
+.placement .cell.hover.clicked .sprite,
+.placement .container.unplaced:active .sprite{
+  filter: grayscale(100%) sepia(100%) brightness(1) hue-rotate(60deg);
+}
+
+.placement .cell {
+  transition: 0.1s;
+}
+
+.placement .cell.bow {
+  z-index: 3;
+}
+
+.placement .cell.hover,
+.placement .container.unplaced:hover .cell{
+  background-color: rgba(0, 255, 0, 0.25);
+}
+
+.placement .cell.hover.clicked,
+.placement .container.unplaced:active .cell{
+  background-color: rgba(155, 255, 155, 0.25);
+}
+
+.boards.placement .board {
+  border: 1px solid rgba(255,255,255,0.15);
 }
 
 .current.board {
@@ -140,10 +234,13 @@ a {
   fill: rgba(255, 0, 0, 0.25);
 }
 
+.boards.placement .cell {
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
 .current > .cell {
   border: 1px solid rgba(255,255,255,0.05);
 }
-
 
 .target > .cell {
   background-color: rgba(0,0,0,0.25);
@@ -257,6 +354,7 @@ a {
   color: white;
   z-index: 50;
   pointer-events: none;
+  animation: title-rise 1s ease-in-out 0s 1 forwards normal;
 }
 
 .current.player-info {
@@ -374,12 +472,28 @@ a {
   justify-content: center;
 }
 
+.game.click-sink,
 .main-menu.click-sink,
 .main-menu .buttons.click-sink {
   animation:
     title-sink 0.25s ease-in-out 0s 1 forwards normal;
 }
 
+.placement.buttons {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  width: 100%;
+  max-width: 640px;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  transform: translate(-50%);
+}
+
+.placement.buttons .button,
 .main-menu .button {
   width: 15rem;
   padding: 0.5rem;
@@ -396,12 +510,22 @@ a {
   user-select: none;
 }
 
+.placement.buttons .button {
+  font-size: 1.75rem;
+}
+
+.placement.buttons .button.disabled {
+  color: grey;
+}
+
+.placement.buttons .button:not(.disabled):hover,
 .main-menu .button:hover {
   color: hsl(0, 0%, 90%);
   background-color: hsla(0, 0%, 100%, 0.1);
   border-radius: 2rem;
 }
 
+.placement.buttons .button:not(.disabled):active,
 .main-menu .button:active {
   color: hsl(0, 0%, 80%);
 }

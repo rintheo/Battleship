@@ -1,5 +1,5 @@
 import '../style.css';
-import { players, generatePlayers } from './game';
+import { players, generatePlayers, placePlayerShips } from './game';
 import AI from './player/ai';
 import Player from './player/player';
 import spriteBattleship from '../assets/shipBattleship.png';
@@ -10,26 +10,31 @@ import spriteSubmarine from '../assets/shipSubmarine.png';
 import spriteFire from '../assets/fire.gif';
 import spriteExplosion from '../assets/explosion.gif';
 
-const shipSprites = [
-  {
-    type: 'Battleship',
-    src: spriteBattleship,
-  },
+const shipsData = [
   {
     type: 'Carrier',
+    length: 5,
     src: spriteCarrier,
   },
   {
+    type: 'Battleship',
+    length: 4,
+    src: spriteBattleship,
+  },
+  {
     type: 'Cruiser',
+    length: 3,
     src: spriteCruiser,
   },
   {
-    type: 'Destroyer',
-    src: spriteDestroyer,
+    type: 'Submarine',
+    length: 3,
+    src: spriteSubmarine,
   },
   {
-    type: 'Submarine',
-    src: spriteSubmarine,
+    type: 'Destroyer',
+    length: 2,
+    src: spriteDestroyer,
   },
 ];
 
@@ -298,7 +303,7 @@ const printSinkingSprite = (targetShip) => {
   if (targetShip.isHorizontal) spriteContainer.classList.add('horizontal');
 
   const shipSprite = document.createElement('img');
-  shipSprite.src = shipSprites.find((sprite) => sprite.type === targetShip.type).src;
+  shipSprite.src = shipsData.find((shipData) => shipData.type === targetShip.type).src;
   shipSprite.classList.add('sprite');
 
   const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
@@ -319,7 +324,7 @@ const printSprites = () => {
     if (ship.isHorizontal) spriteContainer.classList.add('horizontal');
 
     const shipSprite = document.createElement('img');
-    shipSprite.src = shipSprites.find((sprite) => sprite.type === ship.type).src;
+    shipSprite.src = shipsData.find((shipData) => shipData.type === ship.type).src;
     shipSprite.classList.add('sprite');
 
     const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
@@ -385,6 +390,519 @@ const showPauseMenu = () => {
 const clickPauseMenu = () => {
   loseFocusFromGame();
   showPauseMenu();
+};
+
+const clickPlacementShip = (e) => {
+  const { ship } = e.currentTarget.dataset;
+  document
+    .querySelectorAll(`.cell[data-ship="${ship}"`)
+    .forEach((cell) => {
+      cell.classList.add('clicked');
+    });
+};
+
+const unclickShipPlacement = (e) => {
+  const { ship } = e.currentTarget.dataset;
+  document
+    .querySelectorAll(`.cell[data-ship="${ship}"`)
+    .forEach((cell) => {
+      cell.classList.remove('clicked');
+    });
+};
+
+const hoverShipPlacement = (e) => {
+  if (isDraggingShip) return;
+  const { ship } = e.currentTarget.dataset;
+  document
+    .querySelectorAll(`.cell[data-ship="${ship}"`)
+    .forEach((cell) => {
+      cell.classList.add('hover');
+    });
+};
+
+const unhoverShipPlacement = (e) => {
+  const { ship } = e.currentTarget.dataset;
+  document
+    .querySelectorAll(`.cell[data-ship="${ship}"`)
+    .forEach((cell) => {
+      cell.classList.remove('hover');
+    });
+};
+
+const currentPlayerShips = [];
+
+const tempAIShips = [
+  {
+    type: 'Carrier',
+    length: 5,
+    insertCoordinates: [3, 2],
+    horizontal: true,
+  },
+  {
+    type: 'Battleship',
+    length: 4,
+    insertCoordinates: [3, 5],
+    horizontal: true,
+  },
+  {
+    type: 'Cruiser',
+    length: 3,
+    insertCoordinates: [8, 3],
+    horizontal: false,
+  },
+  {
+    type: 'Submarine',
+    length: 3,
+    insertCoordinates: [6, 7],
+    horizontal: false,
+  },
+  {
+    type: 'Destroyer',
+    length: 2,
+    insertCoordinates: [1, 9],
+    horizontal: true,
+  },
+];
+
+const confirmPlacement = () => {
+  placePlayerShips(currentPlayer, currentPlayerShips);
+  currentPlayerShips.length = 0;
+  hideDialog();
+  switchPlayers();
+
+  if (
+    players[0].board.fleet.length > 0
+    && players[1].board.fleet.length > 0
+  ) {
+    window.removeEventListener('mouseup', resetShipPlacementDragData);
+    clearGameContainer();
+    initializeGame();
+  }
+
+  if (currentPlayer instanceof AI) {
+    currentPlayerShips.push(...tempAIShips);
+    confirmPlacement();
+  }
+};
+
+const clickConfirmPlacement = () => {
+  currentPlayerShips.length = 0;
+
+  const placedShips = document.querySelectorAll('.placement.boards .cell.bow .sprite-container');
+  placedShips.forEach((placedShip) => {
+    const {
+      ship, length, bowX, bowY, horizontal,
+    } = placedShip.parentNode.dataset;
+    let insertCoordinates;
+    if (horizontal === 'true') {
+      insertCoordinates = [
+        +bowX - Math.ceil(+length / 2) + 1,
+        +bowY,
+      ];
+    } else {
+      insertCoordinates = [
+        +bowX,
+        +bowY - Math.ceil(+length / 2) + 1,
+      ];
+    }
+    currentPlayerShips.push({
+      type: ship,
+      length: +length,
+      insertCoordinates,
+      horizontal: horizontal === 'true',
+    });
+  });
+
+  const siteContainer = document.querySelector('.site-container');
+
+  const dialogOverlay = document.createElement('div');
+  dialogOverlay.classList.add('dialog-overlay');
+
+  const dialogBox = document.createElement('div');
+  dialogBox.classList.add('dialog');
+
+  const p1 = document.createElement('p');
+  p1.classList.add('sub', 'text');
+  p1.textContent = `You have placed ${currentPlayerShips.length} ship(s).`;
+
+  const p2 = document.createElement('p');
+  p2.textContent = 'Confirm placement?';
+  p2.classList.add('main', 'text');
+
+  const btnYes = document.createElement('button');
+  btnYes.classList.add('play', 'button');
+  btnYes.textContent = 'Yes';
+  btnYes.addEventListener('click', confirmPlacement);
+
+  const btnNo = document.createElement('button');
+  btnNo.classList.add('menu', 'button');
+  btnNo.textContent = 'No';
+  btnNo.addEventListener('click', hideDialog);
+
+  dialogBox.appendChild(p1);
+  dialogBox.appendChild(p2);
+  dialogBox.appendChild(btnYes);
+  dialogBox.appendChild(btnNo);
+  dialogOverlay.appendChild(dialogBox);
+  siteContainer.appendChild(dialogOverlay);
+};
+
+const addEventListenersToShipCell = (cell) => {
+  cell.addEventListener('mouseenter', hoverShipPlacement);
+  cell.addEventListener('mouseleave', unhoverShipPlacement);
+  cell.addEventListener('mousedown', clickPlacementShip);
+  cell.addEventListener('mouseup', unclickShipPlacement);
+  cell.addEventListener('mouseleave', unclickShipPlacement);
+  cell.addEventListener('mousedown', dragShipOnPlacementBoard);
+  cell.addEventListener('click', rotateShipOnPlacementBoard);
+  cell.addEventListener('dblclick', unplaceShipFromPlacementBoard);
+};
+
+const emptyCellDataOnPlacementBoard = (cell) => {
+  cell.classList.remove('bow');
+  cell.classList.remove('hover');
+  cell.removeAttribute('data-ship');
+  cell.removeAttribute('data-length');
+  cell.removeAttribute('data-bow-x');
+  cell.removeAttribute('data-bow-y');
+  cell.removeAttribute('data-horizontal');
+  cell.removeEventListener('mouseenter', hoverShipPlacement);
+  cell.removeEventListener('mouseleave', unhoverShipPlacement);
+  cell.removeEventListener('mousedown', clickPlacementShip);
+  cell.removeEventListener('mouseup', unclickShipPlacement);
+  cell.removeEventListener('mouseleave', unclickShipPlacement);
+  cell.removeEventListener('mousedown', dragShipOnPlacementBoard);
+  cell.removeEventListener('click', rotateShipOnPlacementBoard);
+  cell.removeEventListener('dblclick', unplaceShipFromPlacementBoard);
+};
+
+const rotateShipOnPlacementBoard = (e) => {
+  if (e.detail > 1) return;
+  if (isDraggingShip) return;
+
+  const rotatedShipCell = e.currentTarget;
+  const { ship, length } = rotatedShipCell.dataset;
+  let bowX = +rotatedShipCell.dataset.bowX;
+  let bowY = +rotatedShipCell.dataset.bowY;
+  const rotatedShipContainer = document.querySelector(`.placement .cell[data-ship="${ship}"] .sprite-container`);
+  const rotatedShipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship}"]`);
+
+  rotatedShipCells.forEach((shipCell) => {
+    emptyCellDataOnPlacementBoard(shipCell);
+  });
+
+  if (rotatedShipContainer.classList.contains('horizontal')) {
+    rotatedShipContainer.classList.remove('horizontal');
+  } else {
+    rotatedShipContainer.classList.add('horizontal');
+  }
+
+  let scanUp = true;
+  let scanRight = true;
+
+  for (let i = 0; i < +length; i += 1) {
+    const shipCell = rotatedShipContainer.classList.contains('horizontal')
+      ? document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`)
+      : document.querySelector(`.cell[data-x="${bowX}"][data-y="${bowY - i}"]`);
+    if (
+      !shipCell
+      || (shipCell.dataset.ship && shipCell.dataset.ship !== rotatedShipCell.dataset.ship)
+    ) {
+      if (bowY === 0) scanUp = true;
+      if (bowY === 9) scanUp = false;
+      if (bowX === 0) scanRight = true;
+      if (bowX === 9) scanRight = false;
+      bowY = scanUp ? bowY + 1 : bowY - 1;
+      bowX = scanRight ? bowX + 1 : bowX - 1;
+      i = -1;
+      continue;
+    }
+  }
+
+  for (let i = 0; i < +length; i += 1) {
+    const shipCell = rotatedShipContainer.classList.contains('horizontal')
+      ? document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`)
+      : document.querySelector(`.cell[data-x="${bowX}"][data-y="${bowY - i}"]`);
+    if (!shipCell) continue;
+    if (!shipCell.dataset.ship) {
+      if (i === 0) {
+        shipCell.appendChild(rotatedShipContainer);
+        shipCell.classList.add('bow');
+      }
+      shipCell.dataset.ship = ship;
+      shipCell.dataset.length = length;
+      shipCell.dataset.bowX = bowX;
+      shipCell.dataset.bowY = bowY;
+      shipCell.dataset.horizontal = rotatedShipContainer.classList.contains('horizontal');
+      addEventListenersToShipCell(shipCell);
+    }
+  }
+};
+
+let isDraggingShip = false;
+let draggedShipContainer = null;
+let draggedShipCell = null;
+let draggedShipCells = null;
+
+const resetShipPlacementDragData = () => {
+  isDraggingShip = false;
+  draggedShipContainer = null;
+  draggedShipCell = null;
+  draggedShipCells = null;
+};
+
+const dragShipOnPlacementBoard = (e) => {
+  isDraggingShip = true;
+  draggedShipCell = e.currentTarget;
+
+  const { ship } = draggedShipCell.dataset;
+  draggedShipContainer = document.querySelector(`.placement .cell[data-ship="${ship}"] .sprite-container`);
+  draggedShipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship}"]`);
+};
+
+const moveDraggedShipOnPlacementBoard = (e) => {
+  if (!isDraggingShip) return;
+
+  const { x, y } = e.currentTarget.dataset;
+  const { ship, length } = draggedShipCell.dataset;
+  const bowX = +x + +draggedShipCell.dataset.bowX - draggedShipCell.dataset.x;
+  const bowY = +y + +draggedShipCell.dataset.bowY - draggedShipCell.dataset.y;
+
+  for (let i = 0; i < +length; i += 1) {
+    const shipCell = draggedShipContainer.classList.contains('horizontal')
+      ? document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`)
+      : document.querySelector(`.cell[data-x="${bowX}"][data-y="${bowY - i}"]`);
+    if (
+      !shipCell
+      || (shipCell.dataset.ship && shipCell.dataset.ship !== draggedShipCell.dataset.ship)
+    ) return;
+  }
+
+  const bowCell = document.querySelector(`.placement .cell[data-x="${bowX}"][data-y="${bowY}"]`);
+  if (!bowCell) return;
+  bowCell.appendChild(draggedShipContainer);
+
+  draggedShipCells.forEach((shipCell) => {
+    emptyCellDataOnPlacementBoard(shipCell);
+  });
+
+  for (let i = 0; i < +length; i += 1) {
+    const shipCell = draggedShipContainer.classList.contains('horizontal')
+      ? document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`)
+      : document.querySelector(`.cell[data-x="${bowX}"][data-y="${bowY - i}"]`);
+    if (!shipCell) { continue; }
+    if (i === 0) {
+      shipCell.classList.add('bow');
+    }
+    if (!shipCell.dataset.ship) {
+      shipCell.classList.add('hover');
+      shipCell.classList.add('clicked');
+      shipCell.dataset.ship = ship;
+      shipCell.dataset.length = length;
+      shipCell.dataset.bowX = bowX;
+      shipCell.dataset.bowY = bowY;
+      shipCell.dataset.horizontal = draggedShipContainer.classList.contains('horizontal');
+      addEventListenersToShipCell(shipCell);
+    }
+  }
+
+  draggedShipContainer = document.querySelector(`.placement .cell[data-ship="${ship}"] .sprite-container`);
+  draggedShipCell = e.currentTarget;
+  draggedShipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship}"]`);
+};
+
+const checkForAtLeastOneShipOnPlacementBoard = () => {
+  const hasShip = document.querySelector('.boards.placement .sprite-container');
+  const confirmButton = document.querySelector('#placementConfirmBtn');
+  if (hasShip) {
+    confirmButton.addEventListener('click', clickConfirmPlacement);
+    confirmButton.classList.remove('disabled');
+  } else {
+    confirmButton.removeEventListener('click', clickConfirmPlacement);
+    confirmButton.classList.add('disabled');
+  }
+};
+
+const unplaceShipFromPlacementBoard = (e) => {
+  const { ship } = e.currentTarget.dataset;
+  const unplacedContainer = document.querySelector(`.placement.info .container[data-ship="${ship}"]`);
+  const unplacedCell = document.querySelector(`.placement.info .container[data-ship="${ship}"] .cell:last-child`);
+  const sprite = document.querySelector(`.placement .cell[data-ship="${ship}"] .sprite-container`);
+  const shipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship}"]`);
+  shipCells.forEach((shipCell) => {
+    emptyCellDataOnPlacementBoard(shipCell);
+  });
+  sprite.classList.add('horizontal');
+  unplacedCell.appendChild(sprite);
+  unplacedContainer.classList.add('unplaced');
+  unplacedContainer.addEventListener('click', placeShipOnPlacementBoard, { once: true });
+  checkForAtLeastOneShipOnPlacementBoard();
+};
+
+const resetPlacementBoard = () => {
+  shipsData.forEach((ship) => {
+    const unplacedContainer = document.querySelector(`.placement.info .container[data-ship="${ship.type}"]`);
+    const unplacedCell = document.querySelector(`.placement.info .container[data-ship="${ship.type}"] .cell:last-child`);
+    const sprite = document.querySelector(`.placement .cell[data-ship="${ship.type}"] .sprite-container`);
+    if (sprite) {
+      const shipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship.type}"]`);
+      shipCells.forEach((shipCell) => {
+        emptyCellDataOnPlacementBoard(shipCell);
+      });
+      sprite.classList.add('horizontal');
+      unplacedCell.appendChild(sprite);
+      unplacedContainer.classList.add('unplaced');
+      unplacedContainer.addEventListener('click', placeShipOnPlacementBoard, { once: true });
+    }
+  });
+  checkForAtLeastOneShipOnPlacementBoard();
+};
+
+const placeShipOnPlacementBoard = (e) => {
+  const container = e.currentTarget;
+  const { ship, length } = container.dataset;
+  container.classList.remove('unplaced');
+
+  const sprite = document.querySelector(`.placement [data-ship="${ship}"] .cell .sprite-container`);
+  let bowX = 9;
+  let bowY = 9;
+
+  // Check for valid initial placement
+  for (let i = 0; i < length; i += 1) {
+    const shipCell = document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`);
+    if (!shipCell) {
+      bowX = 9;
+      bowY -= 1;
+      i = -1;
+      continue;
+    }
+    if (shipCell.dataset.ship) {
+      bowX -= 1;
+      i = -1;
+    }
+  }
+
+  // Actually place sprite on success
+  for (let i = 0; i < length; i += 1) {
+    const shipCell = document.querySelector(`.cell[data-x="${bowX - i}"][data-y="${bowY}"]`);
+    if (i === 0) {
+      shipCell.appendChild(sprite);
+      shipCell.classList.add('bow');
+    }
+    shipCell.dataset.ship = ship;
+    shipCell.dataset.length = length;
+    shipCell.dataset.bowX = bowX;
+    shipCell.dataset.bowY = bowY;
+    shipCell.dataset.horizontal = sprite.classList.contains('horizontal');
+    addEventListenersToShipCell(shipCell);
+  }
+  checkForAtLeastOneShipOnPlacementBoard();
+};
+
+const resizePlacementCells = () => {
+  const bowCell = document.querySelector('.placement .cell');
+  const placementCellWidth = window.getComputedStyle(bowCell).width;
+  document.documentElement.style.setProperty('--placement-cell-width', placementCellWidth);
+};
+
+const initializeShipPlacementScreen = (player) => {
+  window.addEventListener('mouseup', resetShipPlacementDragData);
+  const game = document.querySelector('.game');
+  const placementInfo = document.createElement('div');
+  placementInfo.classList.add('placement', 'info');
+
+  const p1 = document.createElement('p');
+  p1.textContent = player.name;
+
+  const p2 = document.createElement('p');
+  p2.textContent = 'Arrange your fleet on the battlefield!';
+
+  const p3 = document.createElement('p');
+  p3.textContent = 'Ships available:';
+
+  const shipsContainer = document.createElement('div');
+  shipsContainer.classList.add('ships');
+
+  shipsData.forEach((shipData) => {
+    const container = document.createElement('div');
+    container.classList.add('container', 'unplaced');
+    container.dataset.ship = shipData.type;
+    container.dataset.length = shipData.length;
+    container.addEventListener('click', placeShipOnPlacementBoard, { once: true });
+
+    for (let i = 1; i <= shipData.length; i += 1) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+
+      if (i === shipData.length) {
+        const spriteContainer = document.createElement('div');
+        spriteContainer.classList.add('sprite-container');
+        spriteContainer.classList.add('horizontal');
+
+        const shipSprite = document.createElement('img');
+        shipSprite.src = shipData.src;
+        shipSprite.classList.add('sprite');
+        shipSprite.draggable = false;
+
+        spriteContainer.appendChild(shipSprite);
+        cell.appendChild(spriteContainer);
+        cell.classList.add('bow');
+      }
+      container.appendChild(cell);
+    }
+    shipsContainer.appendChild(container);
+  });
+
+  placementInfo.appendChild(p1);
+  placementInfo.appendChild(p2);
+  placementInfo.appendChild(p3);
+  placementInfo.appendChild(shipsContainer);
+  game.appendChild(placementInfo);
+
+  const boards = document.querySelector('.boards');
+  boards.classList.add('placement');
+
+  const board = document.createElement('div');
+  board.classList.add('board');
+
+  for (let i = 9; i >= 0; i -= 1) {
+    for (let j = 0; j < 10; j += 1) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.x = j;
+      cell.dataset.y = i;
+      cell.dataset.playerName = player.name;
+      cell.addEventListener('mouseenter', moveDraggedShipOnPlacementBoard);
+      board.appendChild(cell);
+    }
+  }
+  boards.appendChild(board);
+
+  const placementButtons = document.createElement('div');
+  placementButtons.classList.add('placement', 'buttons');
+
+  const resetButton = document.createElement('button');
+  resetButton.classList.add('button');
+  resetButton.textContent = 'Reset';
+  resetButton.addEventListener('click', resetPlacementBoard);
+
+  const confirmButton = document.createElement('button');
+  confirmButton.classList.add('button', 'disabled');
+  confirmButton.textContent = 'Confirm';
+  confirmButton.id = 'placementConfirmBtn';
+
+  placementButtons.appendChild(resetButton);
+  placementButtons.appendChild(confirmButton);
+  game.appendChild(placementButtons);
+
+  resizeSprites();
+};
+
+const clearGameContainer = () => {
+  const game = document.querySelector('.game');
+  while (game.firstChild) {
+    game.removeChild(game.firstChild);
+  }
 };
 
 const initalizeGameContainer = () => {
@@ -527,7 +1045,8 @@ const startGameAI = async (e) => {
   [currentPlayer, targetPlayer] = players;
 
   await clearMainMenu();
-  initializeGame();
+  initalizeGameContainer();
+  initializeShipPlacementScreen(currentPlayer);
 };
 
 const clearMainMenuButtons = () => {
@@ -675,6 +1194,26 @@ const initializeMainMenu = () => {
 };
 
 window.addEventListener('resize', resizeSprites);
+window.addEventListener('resize', resizePlacementCells);
 
 initializeMainMenu();
-// initializeGame();
+
+// Temporary for fast testing
+
+// generatePlayers(
+//   [
+//     {
+//       type: 'human',
+//       name: 'Player 1',
+//     },
+//     {
+//       type: 'AI',
+//       difficulty: 'Easy',
+//     },
+//   ],
+// );
+
+// [currentPlayer, targetPlayer] = players;
+
+// initalizeGameContainer();
+// initializeShipPlacementScreen(currentPlayer);

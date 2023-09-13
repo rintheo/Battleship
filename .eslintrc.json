@@ -15,7 +15,9 @@
         "jest/no-identical-title": "error",
         "jest/prefer-to-have-length": "warn",
         "jest/valid-expect": "error",
-        "no-nested-ternary": "off"
+        "no-nested-ternary": "off",
+        "no-continue": "off",
+        "no-use-before-define": ["error", { "variables": false }]
     },
     "plugins": ["jest"]
 }

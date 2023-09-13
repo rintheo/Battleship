@@ -27,19 +27,19 @@ export default class GameBoard {
     const start = isPlacedHorizontally
       ? x - Math.floor(ship.length / 2)
       : y - Math.floor(ship.length / 2);
-    const end = start + ship.length;
+    const end = start + ship.length - 1;
     const bowCoordinates = isPlacedHorizontally
-      ? { x: end - 1, y }
-      : { x, y: end - 1 };
+      ? { x: end, y }
+      : { x, y: end };
 
     if (ship.hasPositioned) return;
     if (start < 0 || end > 9) return;
-    for (let i = start; i < end; i += 1) {
+    for (let i = start; i <= end; i += 1) {
       if (isPlacedHorizontally && this.board[i][y].ship !== null) return;
       if (!isPlacedHorizontally && this.board[x][i].ship !== null) return;
     }
 
-    for (let i = start; i < end; i += 1) {
+    for (let i = start; i <= end; i += 1) {
       if (isPlacedHorizontally) this.board[i][y].assign(ship);
       if (!isPlacedHorizontally) this.board[x][i].assign(ship);
     }
