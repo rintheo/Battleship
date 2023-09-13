@@ -431,39 +431,6 @@ const unhoverShipPlacement = (e) => {
 
 const currentPlayerShips = [];
 
-const tempAIShips = [
-  {
-    type: 'Carrier',
-    length: 5,
-    insertCoordinates: [3, 2],
-    horizontal: true,
-  },
-  {
-    type: 'Battleship',
-    length: 4,
-    insertCoordinates: [3, 5],
-    horizontal: true,
-  },
-  {
-    type: 'Cruiser',
-    length: 3,
-    insertCoordinates: [8, 3],
-    horizontal: false,
-  },
-  {
-    type: 'Submarine',
-    length: 3,
-    insertCoordinates: [6, 7],
-    horizontal: false,
-  },
-  {
-    type: 'Destroyer',
-    length: 2,
-    insertCoordinates: [1, 9],
-    horizontal: true,
-  },
-];
-
 const confirmPlacement = () => {
   placePlayerShips(currentPlayer, currentPlayerShips);
   currentPlayerShips.length = 0;
@@ -480,7 +447,7 @@ const confirmPlacement = () => {
   }
 
   if (currentPlayer instanceof AI) {
-    currentPlayerShips.push(...tempAIShips);
+    currentPlayerShips.push(...AI.arrangeShipsOnBoard(shipsData));
     confirmPlacement();
   }
 };
