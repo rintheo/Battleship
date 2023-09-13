@@ -439,6 +439,7 @@ const clickPlacementShip = (e) => {
     .forEach((cell) => {
       cell.classList.add('clicked');
     });
+  e.currentTarget.releasePointerCapture(e.pointerId);
 };
 
 const unclickShipPlacement = (e) => {
@@ -562,6 +563,12 @@ const addEventListenersToShipCell = (cell) => {
   cell.addEventListener('mouseup', unclickShipPlacement);
   cell.addEventListener('mouseleave', unclickShipPlacement);
   cell.addEventListener('mousedown', dragShipOnPlacementBoard);
+  cell.addEventListener('pointerenter', hoverShipPlacement);
+  cell.addEventListener('pointerleave', unhoverShipPlacement);
+  cell.addEventListener('pointerdown', clickPlacementShip);
+  cell.addEventListener('pointerup', unclickShipPlacement);
+  cell.addEventListener('pointerleave', unclickShipPlacement);
+  cell.addEventListener('pointerdown', dragShipOnPlacementBoard);
   cell.addEventListener('click', rotateShipOnPlacementBoard);
   cell.addEventListener('dblclick', unplaceShipFromPlacementBoard);
 };
@@ -580,6 +587,12 @@ const emptyCellDataOnPlacementBoard = (cell) => {
   cell.removeEventListener('mouseup', unclickShipPlacement);
   cell.removeEventListener('mouseleave', unclickShipPlacement);
   cell.removeEventListener('mousedown', dragShipOnPlacementBoard);
+  cell.removeEventListener('pointerenter', hoverShipPlacement);
+  cell.removeEventListener('pointerleave', unhoverShipPlacement);
+  cell.removeEventListener('pointerdown', clickPlacementShip);
+  cell.removeEventListener('pointerup', unclickShipPlacement);
+  cell.removeEventListener('pointerleave', unclickShipPlacement);
+  cell.removeEventListener('pointerdown', dragShipOnPlacementBoard);
   cell.removeEventListener('click', rotateShipOnPlacementBoard);
   cell.removeEventListener('dblclick', unplaceShipFromPlacementBoard);
 };
@@ -666,6 +679,8 @@ const dragShipOnPlacementBoard = (e) => {
   const { ship } = draggedShipCell.dataset;
   draggedShipContainer = document.querySelector(`.placement .cell[data-ship="${ship}"] .sprite-container`);
   draggedShipCells = document.querySelectorAll(`.placement .cell[data-ship="${ship}"]`);
+
+  draggedShipCell.releasePointerCapture(e.pointerId);
 };
 
 const moveDraggedShipOnPlacementBoard = (e) => {
@@ -882,6 +897,7 @@ const initializeShipPlacementScreen = (player) => {
       cell.dataset.y = i;
       cell.dataset.playerName = player.name;
       cell.addEventListener('mouseenter', moveDraggedShipOnPlacementBoard);
+      cell.addEventListener('pointerenter', moveDraggedShipOnPlacementBoard);
       board.appendChild(cell);
     }
   }

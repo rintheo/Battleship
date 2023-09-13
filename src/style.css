@@ -109,11 +109,12 @@ a {
 .placement .board {
   margin-top: 12rem;
   max-width: 480px;
+  touch-action: none;
 }
 
 .placement.info {
   position: fixed;
-  top: 1rem;
+  top: 0;
   left: 50%;
   width: 100%;
   max-width: 640px;
@@ -477,7 +478,7 @@ a {
 
 .placement.buttons {
   position: fixed;
-  bottom: 1rem;
+  bottom: 0;
   left: 50%;
   width: 100%;
   max-width: 640px;
@@ -747,6 +748,7 @@ a {
     font-size: 4rem;
   }
 
+  .placement.buttons .button,
   .main-menu .button {
     font-size: 1.5rem
   }
@@ -769,6 +771,7 @@ a {
     font-size: 3rem;
   }
 
+  .placement.buttons .button,
   .main-menu .button {
     font-size: 1.25rem
   }
