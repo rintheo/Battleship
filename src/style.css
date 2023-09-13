@@ -94,12 +94,6 @@ a {
   gap: 1rem;
 }
 
-@media (max-width: 646px) {
-  .boards:not(.placement) {
-    padding: 10rem 0.5rem;
-  }
-}
-
 .board {
   position: relative;
   width: 100%;
@@ -436,6 +430,7 @@ a {
   position: relative;
   min-height: 100vh;
   min-width: 100vw;
+  overflow-x: hidden;
 }
 
 .main-menu {
@@ -444,6 +439,7 @@ a {
   left: 0;
   height: 100%;
   width: 100%;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -727,11 +723,59 @@ a {
 }
 
 .return-focus {
-  animation: return-focus 1s ease-in-out 0s 1 forwards normal;
+  animation: return-focus 0.125s ease-in-out 0s 1 forwards normal;
 }
 
-.display-none {
-  display: none;
+.visibility-hidden {
+  visibility: hidden;
+}
+
+@media (max-width: 646px) {
+  .boards:not(.placement) {
+    padding: 10rem 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-menu > h1 {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-menu > h1 {
+    font-size: 4rem;
+  }
+
+  .main-menu .button {
+    font-size: 1.5rem
+  }
+
+  .main-menu form li .label {
+    font-size: 1.25rem;
+  }
+
+  .main-menu form li input {
+    font-size: 1rem;
+  }
+
+  .main-menu form li .button.AI {
+    font-size: 0.85rem;
+  }  
+}
+
+@media (max-width: 400px) {
+  .main-menu > h1 {
+    font-size: 3rem;
+  }
+
+  .main-menu .button {
+    font-size: 1.25rem
+  }
+
+  .main-menu form li .label {
+    font-size: 1rem;
+  }
 }
 
 @keyframes lose-focus {

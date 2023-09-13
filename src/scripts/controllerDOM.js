@@ -108,6 +108,7 @@ const checkWinningCondition = () => {
   if (!targetPlayer.board.isFleetOperational()) {
     loseFocusFromGame();
     showWinnerDialog();
+    hidePlayerHP();
     return true;
   }
   return false;
@@ -353,6 +354,7 @@ const clearBoard = () => {
 const resumeGame = () => {
   returnFocusToGame();
   hideDialog();
+  unhidePlayerHP();
 };
 
 const restartGame = () => {
@@ -377,7 +379,6 @@ const restartGame = () => {
     ],
   );
   [currentPlayer, targetPlayer] = players;
-  console.log(players);
   initalizeGameContainer();
   initializeShipPlacementScreen(currentPlayer);
 };
@@ -427,6 +428,7 @@ const showPauseMenu = () => {
 
 const clickPauseMenu = () => {
   loseFocusFromGame();
+  hidePlayerHP();
   showPauseMenu();
 };
 
@@ -903,6 +905,7 @@ const initializeShipPlacementScreen = (player) => {
   game.appendChild(placementButtons);
 
   resizeSprites();
+  resizePlacementCells();
 };
 
 const clearGameContainer = () => {
@@ -965,6 +968,19 @@ const initializeBoard = () => {
     boards.appendChild(board);
   });
   printSprites();
+};
+
+const hidePlayerHP = () => {
+  const playersHP = document.querySelectorAll('.player-info');
+  playersHP.forEach((playerHP) => playerHP.classList.add('visibility-hidden'));
+};
+
+const unhidePlayerHP = () => {
+  const game = document.querySelector('.game');
+  const playersHP = document.querySelectorAll('.player-info');
+  game.addEventListener('animationend', () => {
+    playersHP.forEach((playerHP) => playerHP.classList.remove('visibility-hidden'));
+  }, { once: true });
 };
 
 const initializePlayerHP = () => {
