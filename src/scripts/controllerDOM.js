@@ -211,7 +211,7 @@ const updateHP = () => {
     .fleet
     .reduce((total, ship) => total - ship.hits, totalHP);
   const health = `${Math.round((currentHP / totalHP) * 100)}%`;
-  const hit = `${Math.round((1 / 17) * 100)}%`;
+  const hit = `${Math.round((1 / totalHP) * 100)}%`;
   const empty = `${Math.round((1 - currentHP / totalHP) * 100)}%`;
 
   const playerHealthText = document.querySelector(`.${player} .health > .text `);
@@ -1064,6 +1064,14 @@ const clearMainMenuButtons = () => {
   });
 };
 
+const toggleAIDifficulty = (e) => {
+  const currentToggledButton = document.querySelector('.main-menu form .button.AI.toggled');
+  const clickedButton = e.currentTarget;
+
+  currentToggledButton.classList.remove('toggled');
+  clickedButton.classList.add('toggled');
+};
+
 const showVersusAI = async () => {
   await clearMainMenuButtons();
 
@@ -1097,14 +1105,21 @@ const showVersusAI = async () => {
   btnEasy.type = 'button';
   btnEasy.textContent = 'Easy';
   btnEasy.dataset.level = 'Easy';
-  // btnEasy Event Listener for toggle
+  btnEasy.addEventListener('click', toggleAIDifficulty);
 
   const btnNormal = document.createElement('button');
   btnNormal.classList.add('button', 'AI');
   btnNormal.type = 'button';
   btnNormal.textContent = 'Normal';
   btnNormal.dataset.level = 'Normal';
-  // btnNormal Event Listener for toggle
+  btnNormal.addEventListener('click', toggleAIDifficulty);
+
+  const btnCheat = document.createElement('button');
+  btnCheat.classList.add('button', 'AI');
+  btnCheat.type = 'button';
+  btnCheat.textContent = 'Cheat';
+  btnCheat.dataset.level = 'Cheat';
+  btnCheat.addEventListener('click', toggleAIDifficulty);
 
   const li3 = document.createElement('li');
 
@@ -1124,6 +1139,7 @@ const showVersusAI = async () => {
   li2.appendChild(p);
   li2.appendChild(btnEasy);
   li2.appendChild(btnNormal);
+  li2.appendChild(btnCheat);
   li3.appendChild(btnStart);
   ul.appendChild(li1);
   ul.appendChild(li2);
