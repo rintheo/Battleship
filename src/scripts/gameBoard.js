@@ -14,6 +14,10 @@ export default class GameBoard {
     return this.fleet;
   }
 
+  emptyFleet() {
+    this.fleet.length = 0;
+  }
+
   createBoard() {
     for (let i = 0; i < 10; i += 1) {
       this.board[i] = [];

@@ -89,10 +89,12 @@ const showWinnerDialog = () => {
   const btnPlayAgain = document.createElement('button');
   btnPlayAgain.classList.add('play', 'button');
   btnPlayAgain.textContent = 'Play Again';
+  btnPlayAgain.addEventListener('click', restartGame);
 
   const btnMenuReturn = document.createElement('button');
   btnMenuReturn.classList.add('menu', 'button');
   btnMenuReturn.textContent = 'Return to Menu';
+  btnMenuReturn.addEventListener('click', returnToMenu);
 
   dialogBox.appendChild(p1);
   dialogBox.appendChild(p2);
@@ -353,6 +355,40 @@ const resumeGame = () => {
   hideDialog();
 };
 
+const restartGame = () => {
+  returnFocusToGame();
+  hideDialog();
+  clearGameContainer();
+  generatePlayers(
+    [
+      {
+        type: 'human',
+        name: players[0].name,
+      },
+      players[1] instanceof AI
+        ? {
+          type: 'AI',
+          difficulty: players[1].difficulty,
+        }
+        : {
+          type: 'human',
+          name: players[1].name,
+        },
+    ],
+  );
+  [currentPlayer, targetPlayer] = players;
+  console.log(players);
+  initalizeGameContainer();
+  initializeShipPlacementScreen(currentPlayer);
+};
+
+const returnToMenu = () => {
+  returnFocusToGame();
+  hideDialog();
+  clearGameContainer();
+  initializeMainMenu();
+};
+
 const showPauseMenu = () => {
   const siteContainer = document.querySelector('.site-container');
 
@@ -374,10 +410,12 @@ const showPauseMenu = () => {
   const btnRestart = document.createElement('button');
   btnRestart.classList.add('button');
   btnRestart.textContent = 'Restart';
+  btnRestart.addEventListener('click', restartGame);
 
   const btnMenuReturn = document.createElement('button');
   btnMenuReturn.classList.add('button');
   btnMenuReturn.textContent = 'Return to Menu';
+  btnMenuReturn.addEventListener('click', returnToMenu);
 
   dialogBox.appendChild(p);
   dialogBox.appendChild(btnResume);
@@ -930,6 +968,13 @@ const initializeBoard = () => {
 };
 
 const initializePlayerHP = () => {
+  document.documentElement.style.setProperty('--current-health', '100%');
+  document.documentElement.style.setProperty('--current-hit', '0%');
+  document.documentElement.style.setProperty('--current-empty', '0%');
+  document.documentElement.style.setProperty('--enemy-health', '100%');
+  document.documentElement.style.setProperty('--enemy-hit', '0%');
+  document.documentElement.style.setProperty('--enemy-empty', '0%');
+
   const game = document.querySelector('.game');
   players.forEach((player) => {
     const tag = currentPlayer === player ? 'current' : 'enemy';
