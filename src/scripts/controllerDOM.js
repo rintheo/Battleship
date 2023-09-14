@@ -293,6 +293,22 @@ const showPlayerWaitScreen = () => {
   game.appendChild(playerWait);
 };
 
+const scrollToTop = () => {
+  window.scroll({
+    top: 0,
+    left: 0,
+    behavior: 'smooth',
+  });
+};
+
+const scrollToBottom = () => {
+  window.scroll({
+    top: document.body.scrollHeight,
+    left: 0,
+    behavior: 'smooth',
+  });
+};
+
 let previousHitCell = [-1, -1];
 
 const processHit = async ([x, y]) => {
@@ -306,6 +322,7 @@ const processHit = async ([x, y]) => {
   await updateBoard([x, y]);
   if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
   if (checkWinningCondition()) return;
+
   switchPlayers();
   if (currentPlayer instanceof AI) {
     hitCellAI();
@@ -317,12 +334,17 @@ const processHit = async ([x, y]) => {
     });
     clearGameContainer();
     showPlayerWaitScreen();
+  } else {
+    setTimeout(() => {
+      scrollToBottom();
+    }, 1000);
   }
   if (players.some((player) => (player instanceof AI))) hideInputBlocker();
 };
 
 const hitCellAI = () => {
   const [x, y] = currentPlayer.chooseAttackCoordinates(targetPlayer);
+  scrollToTop();
   processHit([x, y]);
 };
 
