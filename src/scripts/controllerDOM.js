@@ -205,9 +205,14 @@ const addMissMark = (targetCell) => {
 };
 
 const updateHP = () => {
-  const player = targetPlayer === players[0]
-    ? 'current'
-    : 'enemy';
+  let tag;
+  if (players.some((player) => player instanceof AI)) {
+    tag = targetPlayer === players[0]
+      ? 'current'
+      : 'enemy';
+  } else {
+    tag = 'enemy';
+  }
   const totalHP = targetPlayer
     .board
     .fleet
@@ -220,16 +225,16 @@ const updateHP = () => {
   const hit = `${Math.round((1 / totalHP) * 100)}%`;
   const empty = `${Math.round((1 - currentHP / totalHP) * 100)}%`;
 
-  const playerHealthText = document.querySelector(`.${player} .health > .text `);
+  const playerHealthText = document.querySelector(`.${tag} .health > .text `);
   playerHealthText.textContent = `${currentHP}/${totalHP}`;
 
-  document.documentElement.style.setProperty(`--${player}-health`, health);
-  document.documentElement.style.setProperty(`--${player}-hit`, hit);
+  document.documentElement.style.setProperty(`--${tag}-health`, health);
+  document.documentElement.style.setProperty(`--${tag}-hit`, hit);
 
-  const playerHealthBar = document.querySelector(`.${player} .health > .bar `);
+  const playerHealthBar = document.querySelector(`.${tag} .health > .bar `);
   playerHealthBar.addEventListener('transitionend', () => {
-    document.documentElement.style.setProperty(`--${player}-hit`, '0%');
-    document.documentElement.style.setProperty(`--${player}-empty`, empty);
+    document.documentElement.style.setProperty(`--${tag}-hit`, '0%');
+    document.documentElement.style.setProperty(`--${tag}-empty`, empty);
   }, { once: true });
 };
 
@@ -249,15 +254,6 @@ const updateBoard = async ([x, y]) => {
     targetCell.classList.add('miss');
     addMissMark(targetCell);
   }
-
-  if (players.every((player) => !(player instanceof AI))) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    });
-  }
-  return Promise.resolve();
 };
 
 const showInputBlocker = () => {
@@ -291,6 +287,11 @@ const processHit = async ([x, y]) => {
   if (currentPlayer instanceof AI) {
     hitCellAI();
   } else if (!(targetPlayer instanceof AI)) {
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
     clearGameContainer();
     initializeGame();
   }
@@ -508,6 +509,7 @@ const confirmPlacement = () => {
     window.removeEventListener('mouseup', resetShipPlacementDragData);
     window.removeEventListener('resize', resizePlacementCells);
     clearGameContainer();
+    initalizePlayerHPValues();
     initializeGame();
     return;
   }
@@ -1048,6 +1050,11 @@ const initializeBoard = async () => {
   });
   printSprites();
   if (players.every((player) => !(player instanceof AI))) {
+    updatePlayersHPOnTurnStart();
+    const [prevX, prevY] = previousHitCell;
+    if (prevX !== -1 && prevY !== -1) {
+      if (currentPlayer.board.getBoard()[prevX][prevY].ship) animateCurrentPlayerHPHitOnTurnStart();
+    }
     setTimeout(() => {
       printPreviousPlayerAttack();
     }, 500);
@@ -1067,14 +1074,79 @@ const unhidePlayerHP = () => {
   }, { once: true });
 };
 
-const initializePlayerHP = () => {
+const initalizePlayerHPValues = () => {
   document.documentElement.style.setProperty('--current-health', '100%');
   document.documentElement.style.setProperty('--current-hit', '0%');
   document.documentElement.style.setProperty('--current-empty', '0%');
   document.documentElement.style.setProperty('--enemy-health', '100%');
   document.documentElement.style.setProperty('--enemy-hit', '0%');
   document.documentElement.style.setProperty('--enemy-empty', '0%');
+};
 
+const animateCurrentPlayerHPHitOnTurnStart = async () => {
+  const totalHP = currentPlayer
+    .board
+    .fleet
+    .reduce((total, ship) => total + ship.length, 0);
+  const currentHP = currentPlayer
+    .board
+    .fleet
+    .reduce((total, ship) => total - ship.hits, totalHP);
+  const health = `${Math.round((currentHP / totalHP) * 100)}%`;
+  const hit = `${Math.round((1 / totalHP) * 100)}%`;
+  const empty = `${Math.round((1 - currentHP / totalHP) * 100)}%`;
+
+  const playerHealthText = document.querySelector('.current .health > .text ');
+
+  await new Promise((resolve) => {
+    const initHealth = `${Math.round(((currentHP + 1) / totalHP) * 100)}%`;
+    const initEmpty = `${Math.round((1 - (currentHP + 1) / totalHP) * 100)}%`;
+    document.documentElement.style.setProperty('--current-health', initHealth);
+    document.documentElement.style.setProperty('--current-empty', initEmpty);
+    playerHealthText.textContent = `${currentHP + 1}/${totalHP}`;
+    setTimeout(() => {
+      resolve();
+    }, 1000);
+  });
+
+  playerHealthText.textContent = `${currentHP}/${totalHP}`;
+
+  document.documentElement.style.setProperty('--current-health', health);
+  document.documentElement.style.setProperty('--current-hit', hit);
+
+  const playerHealthBar = document.querySelector('.current .health > .bar ');
+  playerHealthBar.addEventListener('transitionend', () => {
+    document.documentElement.style.setProperty('--current-hit', '0%');
+    document.documentElement.style.setProperty('--current-empty', empty);
+  }, { once: true });
+};
+
+const updatePlayersHPOnTurnStart = async () => {
+  players.forEach((player) => {
+    const tag = currentPlayer === player
+      ? 'current'
+      : 'enemy';
+    const totalHP = player
+      .board
+      .fleet
+      .reduce((total, ship) => total + ship.length, 0);
+    const currentHP = player
+      .board
+      .fleet
+      .reduce((total, ship) => total - ship.hits, totalHP);
+    const health = `${Math.round((currentHP / totalHP) * 100)}%`;
+    const empty = `${Math.round((1 - currentHP / totalHP) * 100)}%`;
+
+    const playerHealthText = document.querySelector(`.${tag} .health > .text `);
+    playerHealthText.textContent = `${currentHP}/${totalHP}`;
+
+    document.documentElement.style.setProperty(`--${tag}-health`, health);
+    document.documentElement.style.setProperty(`--${tag}-hit`, '0%');
+    document.documentElement.style.setProperty(`--${tag}-empty`, empty);
+  });
+};
+
+const initializePlayerHP = () => {
   const game = document.querySelector('.game');
   players.forEach((player) => {
     const tag = currentPlayer === player ? 'current' : 'enemy';
