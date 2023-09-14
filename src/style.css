@@ -39,7 +39,7 @@ a {
   max-width: 1280px;
 }
 
-.settings-btn-container {
+.btn-container {
   position: fixed;
   top: 0;
   height: 0;
@@ -51,6 +51,7 @@ a {
   background-color: white;
 }
 
+.volume-btn,
 .settings-btn {
   display: block;
   height: 1.5rem;
@@ -59,16 +60,36 @@ a {
   fill: white;
   background-color: transparent;
   border: none;  
+} 
+
+.settings-btn {
   transition: 
     transform 0.25s ease-in-out 0s,
     fill 0.25s ease-in-out 0s;
-} 
+}
 
+.volume-btn.mute {
+  fill: red;
+}
+
+.volume-btn.mute:hover {
+  fill: hsl(0, 100%, 40%);
+}
+
+.volume-btn.mute:active {
+  fill: hsl(0, 100%, 30%);
+}
+
+.volume-btn:hover,
 .settings-btn:hover {
   fill: hsl(0, 0%, 90%);
+}
+
+.settings-btn:hover {
   transform: rotate(45deg);
 }
 
+.volume-btn:active,
 .settings-btn:active {
   fill: hsl(0, 0%, 80%);
 }

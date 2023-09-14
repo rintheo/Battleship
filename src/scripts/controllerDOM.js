@@ -10,14 +10,24 @@ import spriteSubmarine from '../assets/shipSubmarine.png';
 import spriteFire from '../assets/fire.gif';
 import spriteExplosion from '../assets/explosion.gif';
 
+let audioVolume = 1;
+
+const changeAudioVolume = (value) => {
+  audioVolume = value;
+  const audios = document.querySelectorAll('audio');
+  audios.forEach((audio) => audio.volume = value);
+};
+
 const playMenuClickSFX = () => {
   const audio = document.querySelector('#sfxMenu');
+  audio.volume = audioVolume;
   audio.currentTime = 0;
   audio.play();
 };
 
 const playFireSFX = () => {
   const audio = document.querySelector('#sfxFire');
+  audio.volume = audioVolume;
   audio.currentTime = 0;
   audio.play();
 };
@@ -32,6 +42,7 @@ const playMenuBGM = () => {
   stopVictoryBGM();
   stopGameBGM();
   const audio = document.querySelector('#bgmMenu');
+  audio.volume = audioVolume;
   audio.play();
 };
 
@@ -45,6 +56,7 @@ const playVictoryBGM = () => {
   stopMenuBGM();
   stopGameBGM();
   const audio = document.querySelector('#bgmVictory');
+  audio.volume = audioVolume;
   audio.play();
 };
 
@@ -58,6 +70,7 @@ const playGameBGM = () => {
   stopMenuBGM();
   stopVictoryBGM();
   const audio = document.querySelector('#bgmGame');
+  audio.volume = audioVolume;
   audio.play();
 };
 
@@ -1070,11 +1083,58 @@ const clearGameContainer = () => {
   }
 };
 
+const toggleVolume = (e) => {
+  if (audioVolume === 1) {
+    changeAudioVolume(0.66);
+    e.currentTarget.firstChild.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-medium</title><path d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" /></svg>';
+  } else if (audioVolume === 0.66) {
+    changeAudioVolume(0.33);
+    e.currentTarget.firstChild.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-low</title><path d="M7,9V15H11L16,20V4L11,9H7Z" /></svg>';
+  } else if (audioVolume === 0.33) {
+    changeAudioVolume(0);
+    e.currentTarget.classList.add('mute');
+    e.currentTarget.firstChild.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-off</title><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" /></svg>';
+  } else if (audioVolume === 0) {
+    changeAudioVolume(1);
+    e.currentTarget.classList.remove('mute');
+    e.currentTarget.firstChild.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-high</title><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg>';
+  }
+  playMenuClickSFX();
+};
+
+const showVolumeButton = () => {
+  const mainMenu = document.querySelector('.main-menu');
+
+  const btnContainer = document.createElement('div');
+  btnContainer.classList.add('btn-container', 'max-width');
+
+  const volumeBtn = document.createElement('button');
+  volumeBtn.classList.add('volume-btn');
+  volumeBtn.addEventListener('click', toggleVolume);
+
+  const volumeBtnSVG = document.createElement('svg');
+
+  volumeBtn.appendChild(volumeBtnSVG);
+  btnContainer.appendChild(volumeBtn);
+  mainMenu.appendChild(btnContainer);
+
+  if (audioVolume === 1) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-high</title><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg>';
+  } else if (audioVolume === 0.66) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-medium</title><path d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" /></svg>';
+  } else if (audioVolume === 0.33) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-low</title><path d="M7,9V15H11L16,20V4L11,9H7Z" /></svg>';
+  } else if (audioVolume === 0) {
+    volumeBtn.classList.add('mute');
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-off</title><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" /></svg>';
+  }
+};
+
 const initializeGameContainer = () => {
   const game = document.querySelector('.game');
 
-  const settingsBtnContainer = document.createElement('div');
-  settingsBtnContainer.classList.add('settings-btn-container', 'max-width');
+  const btnContainer = document.createElement('div');
+  btnContainer.classList.add('btn-container', 'max-width');
 
   const settingsBtn = document.createElement('button');
   settingsBtn.classList.add('settings-btn');
@@ -1082,15 +1142,33 @@ const initializeGameContainer = () => {
 
   const settingsBtnSVG = document.createElement('svg');
 
+  const volumeBtn = document.createElement('button');
+  volumeBtn.classList.add('volume-btn');
+  volumeBtn.addEventListener('click', toggleVolume);
+
+  const volumeBtnSVG = document.createElement('svg');
+
   const boards = document.createElement('div');
   boards.classList.add('boards', 'max-width');
 
+  volumeBtn.appendChild(volumeBtnSVG);
   settingsBtn.appendChild(settingsBtnSVG);
-  settingsBtnContainer.appendChild(settingsBtn);
-  game.appendChild(settingsBtnContainer);
+  btnContainer.appendChild(volumeBtn);
+  btnContainer.appendChild(settingsBtn);
+  game.appendChild(btnContainer);
   game.appendChild(boards);
 
   settingsBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>cog</title><path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" /></svg>';
+  if (audioVolume === 1) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-high</title><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" /></svg>';
+  } else if (audioVolume === 0.66) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-medium</title><path d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" /></svg>';
+  } else if (audioVolume === 0.33) {
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-low</title><path d="M7,9V15H11L16,20V4L11,9H7Z" /></svg>';
+  } else if (audioVolume === 0) {
+    volumeBtn.classList.add('mute');
+    volumeBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>volume-off</title><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" /></svg>';
+  }
 };
 
 const printPreviousPlayerAttack = async () => {
@@ -1603,6 +1681,7 @@ const initializeMainMenu = () => {
   siteContainer.appendChild(mainMenu);
 
   githubSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>github</title><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z" /></svg>';
+  showVolumeButton();
 };
 
 initializeMainMenu();
