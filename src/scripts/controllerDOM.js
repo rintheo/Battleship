@@ -468,17 +468,17 @@ const showPauseMenu = () => {
   const btnResume = document.createElement('button');
   btnResume.classList.add('button');
   btnResume.textContent = 'Resume';
-  btnResume.addEventListener('click', resumeGame);
+  btnResume.addEventListener('click', resumeGame, { once: true });
 
   const btnRestart = document.createElement('button');
   btnRestart.classList.add('button');
   btnRestart.textContent = 'Restart';
-  btnRestart.addEventListener('click', restartGame);
+  btnRestart.addEventListener('click', restartGame, { once: true });
 
   const btnMenuReturn = document.createElement('button');
   btnMenuReturn.classList.add('button');
   btnMenuReturn.textContent = 'Return to Menu';
-  btnMenuReturn.addEventListener('click', returnToMenu);
+  btnMenuReturn.addEventListener('click', returnToMenu, { once: true });
 
   dialogBox.appendChild(p);
   dialogBox.appendChild(btnResume);
@@ -613,12 +613,12 @@ const clickConfirmPlacement = () => {
   const btnYes = document.createElement('button');
   btnYes.classList.add('play', 'button');
   btnYes.textContent = 'Yes';
-  btnYes.addEventListener('click', confirmPlacement);
+  btnYes.addEventListener('click', confirmPlacement, { once: true });
 
   const btnNo = document.createElement('button');
   btnNo.classList.add('menu', 'button');
   btnNo.textContent = 'No';
-  btnNo.addEventListener('click', hideDialog);
+  btnNo.addEventListener('click', hideDialog, { once: true });
 
   dialogBox.appendChild(p1);
   dialogBox.appendChild(p2);
@@ -1363,12 +1363,12 @@ const showVersusPlayer = async () => {
   btnStart.classList.add('button');
   btnStart.type = 'submit';
   btnStart.textContent = 'Start Game';
-  btnStart.addEventListener('click', startGamePlayer);
+  btnStart.addEventListener('click', startGamePlayer, { once: true });
 
   const btnBack = document.createElement('button');
   btnBack.classList.add('button');
   btnBack.textContent = 'Back';
-  btnBack.addEventListener('click', showVersusOptions);
+  btnBack.addEventListener('click', showVersusOptions, { once: true });
 
   li1.appendChild(label1);
   li1.appendChild(input1);
@@ -1446,12 +1446,12 @@ const showVersusAI = async () => {
   btnStart.classList.add('button');
   btnStart.type = 'submit';
   btnStart.textContent = 'Start Game';
-  btnStart.addEventListener('click', startGameAI);
+  btnStart.addEventListener('click', startGameAI, { once: true });
 
   const btnBack = document.createElement('button');
   btnBack.classList.add('button');
   btnBack.textContent = 'Back';
-  btnBack.addEventListener('click', showVersusOptions);
+  btnBack.addEventListener('click', showVersusOptions, { once: true });
 
   li1.appendChild(label);
   li1.appendChild(input);
@@ -1476,12 +1476,12 @@ const showVersusOptions = async () => {
   const versusPlayerBtn = document.createElement('button');
   versusPlayerBtn.classList.add('button');
   versusPlayerBtn.textContent = 'Versus Player';
-  versusPlayerBtn.addEventListener('click', showVersusPlayer);
+  versusPlayerBtn.addEventListener('click', showVersusPlayer, { once: true });
 
   const versusAIBtn = document.createElement('button');
   versusAIBtn.classList.add('button');
   versusAIBtn.textContent = 'Versus AI';
-  versusAIBtn.addEventListener('click', showVersusAI);
+  versusAIBtn.addEventListener('click', showVersusAI, { once: true });
 
   buttonsContainer.appendChild(versusPlayerBtn);
   buttonsContainer.appendChild(versusAIBtn);
@@ -1505,7 +1505,7 @@ const initializeMainMenu = () => {
   const playGameBtn = document.createElement('button');
   playGameBtn.classList.add('button');
   playGameBtn.textContent = 'Play Game';
-  playGameBtn.addEventListener('click', showVersusOptions);
+  playGameBtn.addEventListener('click', showVersusOptions, { once: true });
 
   const copyright = document.createElement('p');
   copyright.classList.add('copyright');
