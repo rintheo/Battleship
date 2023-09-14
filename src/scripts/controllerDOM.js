@@ -15,7 +15,10 @@ let audioVolume = 1;
 const changeAudioVolume = (value) => {
   audioVolume = value;
   const audios = document.querySelectorAll('audio');
-  audios.forEach((audio) => audio.volume = value);
+  audios.forEach((audio) => {
+    const sound = audio;
+    sound.volume = value;
+  });
 };
 
 const playMenuClickSFX = () => {
