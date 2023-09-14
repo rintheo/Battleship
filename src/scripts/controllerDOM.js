@@ -368,13 +368,6 @@ const resizeSprites = () => {
   document.documentElement.style.setProperty('--sprite-scale', spriteScale);
 };
 
-const clearBoard = () => {
-  const boards = document.querySelector('.boards');
-  while (boards.firstChild) {
-    boards.removeChild(boards.firstChild);
-  }
-};
-
 const resumeGame = () => {
   returnFocusToGame();
   hideDialog();
