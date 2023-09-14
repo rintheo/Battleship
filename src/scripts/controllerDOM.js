@@ -270,6 +270,29 @@ const hideInputBlocker = () => {
   game.removeChild(blocker);
 };
 
+const startTurn = () => {
+  clearGameContainer();
+  initializeGame();
+};
+
+const showPlayerWaitScreen = () => {
+  const game = document.querySelector('.game');
+
+  const playerWait = document.createElement('div');
+  playerWait.classList.add('player-wait');
+  playerWait.addEventListener('click', startTurn);
+
+  const h2 = document.createElement('h2');
+  h2.textContent = currentPlayer.name;
+
+  const p = document.createElement('p');
+  p.textContent = 'Press anywhere to start your turn.';
+
+  playerWait.appendChild(h2);
+  playerWait.appendChild(p);
+  game.appendChild(playerWait);
+};
+
 let previousHitCell = [-1, -1];
 
 const processHit = async ([x, y]) => {
@@ -290,10 +313,10 @@ const processHit = async ([x, y]) => {
     await new Promise((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 1000);
+      }, 2500);
     });
     clearGameContainer();
-    initializeGame();
+    showPlayerWaitScreen();
   }
   if (players.some((player) => (player instanceof AI))) hideInputBlocker();
 };
@@ -501,9 +524,13 @@ const confirmPlacement = () => {
   ) {
     window.removeEventListener('mouseup', resetShipPlacementDragData);
     window.removeEventListener('resize', resizePlacementCells);
-    clearGameContainer();
     initalizePlayerHPValues();
-    initializeGame();
+    clearGameContainer();
+    if (players.some((player) => player instanceof AI)) {
+      initializeGame();
+    } else {
+      showPlayerWaitScreen();
+    }
     return;
   }
 

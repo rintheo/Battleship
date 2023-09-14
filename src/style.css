@@ -633,6 +633,36 @@ a {
   fill: hsl(0, 0%, 70%);
 }
 
+.player-wait {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  color: white;
+  text-shadow: 3px 3px 1px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  text-align: center;
+  animation: 
+    title-idle 2s ease-in-out 0s infinite forwards alternate,
+    title-rise 1s ease-in-out 0s 1 forwards normal;
+  user-select: none;
+}
+
+.player-wait h2 {
+  font-size: 6rem;
+  font-weight: 800;
+}
+
+.player-wait p {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
 .dialog-overlay {
   position: fixed;
   top: 0;
@@ -745,6 +775,14 @@ a {
   .main-menu > h1 {
     font-size: 5rem;
   }
+
+  .player-wait h2 {
+    font-size: 5rem;
+  }
+  
+  .player-wait p {
+    font-size: 1.75rem;
+  }  
 }
 
 @media (max-width: 500px) {
@@ -768,6 +806,14 @@ a {
   .main-menu form li .button.AI {
     font-size: 0.85rem;
   }  
+
+  .player-wait h2 {
+    font-size: 4rem;
+  }
+  
+  .player-wait p {
+    font-size: 1.5rem;
+  }  
 }
 
 @media (max-width: 400px) {
@@ -783,6 +829,14 @@ a {
   .main-menu form li .label {
     font-size: 1rem;
   }
+
+  .player-wait h2 {
+    font-size: 3rem;
+  }
+  
+  .player-wait p {
+    font-size: 1.15rem;
+  }  
 }
 
 @keyframes lose-focus {
