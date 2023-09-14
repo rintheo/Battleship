@@ -125,41 +125,42 @@ const selectShipObject = (player, cell) => {
 };
 
 const ifSunkExplosion = (cell) => {
-  const targetCell = cell;
-  if (targetCell.dataset.ship) {
-    const targetShip = selectShipObject(targetPlayer, targetCell);
-    if (targetShip.hasSunk) {
+  const explodingCell = cell;
+  if (explodingCell.dataset.ship) {
+    const explodingCellPlayer = players.find((player) => player.name === cell.dataset.playerName);
+    const explodingShip = selectShipObject(explodingCellPlayer, explodingCell);
+    if (explodingShip.hasSunk) {
       const array = [
         [
-          +targetCell.dataset.x + 1,
-          +targetCell.dataset.y,
+          +explodingCell.dataset.x + 1,
+          +explodingCell.dataset.y,
         ],
         [
-          +targetCell.dataset.x - 1,
-          +targetCell.dataset.y,
+          +explodingCell.dataset.x - 1,
+          +explodingCell.dataset.y,
         ],
         [
-          +targetCell.dataset.x,
-          +targetCell.dataset.y + 1,
+          +explodingCell.dataset.x,
+          +explodingCell.dataset.y + 1,
         ],
         [
-          +targetCell.dataset.x,
-          +targetCell.dataset.y - 1,
+          +explodingCell.dataset.x,
+          +explodingCell.dataset.y - 1,
         ],
       ];
-      targetCell.dataset.ship = '';
-      targetCell.classList.add('sunk');
+      explodingCell.dataset.ship = '';
+      explodingCell.classList.add('sunk');
 
       array.forEach(([x, y]) => {
-        const nextCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"][data-ship="${targetShip.type}"]`);
+        const nextCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${explodingCellPlayer.name}"][data-ship="${explodingShip.type}"]`);
         if (nextCell) hitExplosionEffect(nextCell);
       });
     }
   }
 };
 
-const hitExplosionEffect = async (targetCell) => {
-  ifSunkExplosion(targetCell);
+const hitExplosionEffect = async (cell) => {
+  ifSunkExplosion(cell);
 
   const explosionContainer = document.createElement('div');
   explosionContainer.classList.add('explosion-container');
@@ -168,14 +169,14 @@ const hitExplosionEffect = async (targetCell) => {
   explosion.src = `${spriteExplosion}?rand=${Math.random()}`;
   explosion.classList.add('explosion');
 
-  const explosionScale = 1.5 * (parseInt(window.getComputedStyle(targetCell).width, 10) / 60);
+  const explosionScale = 1.5 * (parseInt(window.getComputedStyle(cell).width, 10) / 60);
   document.documentElement.style.setProperty('--explosion-scale', explosionScale);
 
   explosionContainer.appendChild(explosion);
-  targetCell.appendChild(explosionContainer);
+  cell.appendChild(explosionContainer);
 
   setTimeout(() => {
-    targetCell.removeChild(explosionContainer);
+    cell.removeChild(explosionContainer);
   }, 5000);
 
   return new Promise((resolve) => {
@@ -248,6 +249,15 @@ const updateBoard = async ([x, y]) => {
     targetCell.classList.add('miss');
     addMissMark(targetCell);
   }
+
+  if (players.every((player) => !(player instanceof AI))) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+  }
+  return Promise.resolve();
 };
 
 const showInputBlocker = () => {
@@ -264,19 +274,27 @@ const hideInputBlocker = () => {
   game.removeChild(blocker);
 };
 
+let previousHitCell = [-1, -1];
+
 const processHit = async ([x, y]) => {
   targetPlayer
     .board
     .receiveAttack(
       [x, y],
     );
+  previousHitCell = [+x, +y];
   showInputBlocker();
   await updateBoard([x, y]);
   if (targetPlayer.board.getBoard()[x][y].ship) updateHP();
   if (checkWinningCondition()) return;
   switchPlayers();
-  if (currentPlayer instanceof AI) hitCellAI();
-  hideInputBlocker();
+  if (currentPlayer instanceof AI) {
+    hitCellAI();
+  } else if (!(targetPlayer instanceof AI)) {
+    clearGameContainer();
+    initializeGame();
+  }
+  if (players.some((player) => (player instanceof AI))) hideInputBlocker();
 };
 
 const hitCellAI = () => {
@@ -296,19 +314,20 @@ const hitCellPlayer = (e) => {
   }
 };
 
-const printSinkingSprite = (targetShip) => {
-  const { x, y } = targetShip.bowCoordinates;
-  const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${targetPlayer.name}"]`);
+const printSinkingSprite = (ship) => {
+  const { x, y } = ship.bowCoordinates;
+  const shipPlayer = players.find((player) => player.board.getFleet().includes(ship));
+  const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${shipPlayer.name}"]`);
   const bowCellChildren = Array.from(bowCell.childNodes);
   if (bowCellChildren.some((child) => child.classList.contains('sprite-container'))) return;
   bowCell.classList.add('ship-bow');
 
   const spriteContainer = document.createElement('div');
   spriteContainer.classList.add('sprite-container');
-  if (targetShip.isHorizontal) spriteContainer.classList.add('horizontal');
+  if (ship.isHorizontal) spriteContainer.classList.add('horizontal');
 
   const shipSprite = document.createElement('img');
-  shipSprite.src = shipsData.find((shipData) => shipData.type === targetShip.type).src;
+  shipSprite.src = shipsData.find((shipData) => shipData.type === ship.type).src;
   shipSprite.classList.add('sprite');
 
   const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
@@ -320,23 +339,25 @@ const printSinkingSprite = (targetShip) => {
 
 const printSprites = () => {
   currentPlayer.board.getFleet().forEach((ship) => {
-    const { x, y } = ship.bowCoordinates;
-    const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${currentPlayer.name}"]`);
-    bowCell.classList.add('ship-bow');
+    if (!ship.hasSunk) {
+      const { x, y } = ship.bowCoordinates;
+      const bowCell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"][data-player-name="${currentPlayer.name}"]`);
+      bowCell.classList.add('ship-bow');
 
-    const spriteContainer = document.createElement('div');
-    spriteContainer.classList.add('sprite-container');
-    if (ship.isHorizontal) spriteContainer.classList.add('horizontal');
+      const spriteContainer = document.createElement('div');
+      spriteContainer.classList.add('sprite-container');
+      if (ship.isHorizontal) spriteContainer.classList.add('horizontal');
 
-    const shipSprite = document.createElement('img');
-    shipSprite.src = shipsData.find((shipData) => shipData.type === ship.type).src;
-    shipSprite.classList.add('sprite');
+      const shipSprite = document.createElement('img');
+      shipSprite.src = shipsData.find((shipData) => shipData.type === ship.type).src;
+      shipSprite.classList.add('sprite');
 
-    const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
-    document.documentElement.style.setProperty('--sprite-scale', spriteScale);
+      const spriteScale = 0.35 * (parseInt(window.getComputedStyle(bowCell).width, 10) / 60);
+      document.documentElement.style.setProperty('--sprite-scale', spriteScale);
 
-    spriteContainer.appendChild(shipSprite);
-    bowCell.appendChild(spriteContainer);
+      spriteContainer.appendChild(shipSprite);
+      bowCell.appendChild(spriteContainer);
+    }
   });
 };
 
@@ -382,7 +403,7 @@ const restartGame = () => {
   );
   [currentPlayer, targetPlayer] = players;
   initalizeGameContainer();
-  initializeShipPlacementScreen(currentPlayer);
+  initializeShipPlacementScreen();
 };
 
 const returnToMenu = () => {
@@ -488,11 +509,16 @@ const confirmPlacement = () => {
     window.removeEventListener('resize', resizePlacementCells);
     clearGameContainer();
     initializeGame();
+    return;
   }
 
   if (currentPlayer instanceof AI) {
     currentPlayerShips.push(...AI.arrangeShipsOnBoard(shipsData));
     confirmPlacement();
+  } else {
+    clearGameContainer();
+    initalizeGameContainer();
+    initializeShipPlacementScreen();
   }
 };
 
@@ -830,7 +856,7 @@ const resizePlacementCells = () => {
   document.documentElement.style.setProperty('--placement-cell-width', placementCellWidth);
 };
 
-const initializeShipPlacementScreen = (player) => {
+const initializeShipPlacementScreen = () => {
   window.addEventListener('mouseup', resetShipPlacementDragData);
   window.addEventListener('resize', resizePlacementCells);
   const game = document.querySelector('.game');
@@ -838,7 +864,7 @@ const initializeShipPlacementScreen = (player) => {
   placementInfo.classList.add('placement', 'info');
 
   const p1 = document.createElement('p');
-  p1.textContent = player.name;
+  p1.textContent = currentPlayer.name;
 
   const p2 = document.createElement('p');
   p2.textContent = 'Arrange your fleet on the battlefield!';
@@ -897,7 +923,7 @@ const initializeShipPlacementScreen = (player) => {
       cell.classList.add('cell');
       cell.dataset.x = j;
       cell.dataset.y = i;
-      cell.dataset.playerName = player.name;
+      cell.dataset.playerName = currentPlayer.name;
       cell.addEventListener('mouseenter', moveDraggedShipOnPlacementBoard);
       cell.addEventListener('pointerenter', moveDraggedShipOnPlacementBoard);
       board.appendChild(cell);
@@ -956,36 +982,75 @@ const initalizeGameContainer = () => {
   settingsBtnSVG.outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>cog</title><path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" /></svg>';
 };
 
-const initializeBoard = () => {
+const printPreviousPlayerAttack = async () => {
+  const [x, y] = previousHitCell;
+  const currentPlayerHitCell = document.querySelector(`.board.current .cell[data-x="${x}"][data-y="${y}"]`);
+  if (!currentPlayerHitCell) return;
+  if (currentPlayer.board.getBoard()[x][y].ship) {
+    const currentShip = currentPlayer.board.getBoard()[x][y].ship;
+    if (currentShip.hasSunk) {
+      printSinkingSprite(currentShip);
+    }
+  }
+  await hitExplosionEffect(currentPlayerHitCell);
+  if (currentPlayer.board.getBoard()[x][y].ship) {
+    currentPlayerHitCell.classList.add('hit');
+    if (currentPlayerHitCell.dataset.ship) addFireEffect(currentPlayerHitCell);
+  } else {
+    currentPlayerHitCell.classList.add('miss');
+    addMissMark(currentPlayerHitCell);
+  }
+};
+
+const initializeBoard = async () => {
   window.addEventListener('resize', resizeSprites);
-  players.forEach((player) => {
+  [currentPlayer, targetPlayer].forEach(async (player) => {
     const boards = document.querySelector('.boards');
     const board = document.createElement('div');
     board.classList.add('board');
     if (player === currentPlayer) board.classList.add('current');
     if (player === targetPlayer) board.classList.add('target');
 
-    for (let i = 9; i >= 0; i -= 1) {
-      for (let j = 0; j < 10; j += 1) {
+    for (let y = 9; y >= 0; y -= 1) {
+      for (let x = 0; x < 10; x += 1) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
-        cell.dataset.x = j;
-        cell.dataset.y = i;
+        cell.dataset.x = x;
+        cell.dataset.y = y;
         cell.dataset.playerName = player.name;
-        cell.dataset.ship = player.board.getBoard()[j][i].ship
-          ? player.board.getBoard()[j][i].ship.type
+        cell.dataset.ship = player.board.getBoard()[x][y].ship
+          ? player.board.getBoard()[x][y].ship.type
           : '';
         if (
           player === targetPlayer
           && currentPlayer instanceof Player
           && !(currentPlayer instanceof AI)
         ) cell.addEventListener('click', hitCellPlayer);
+
+        const [prevX, prevY] = previousHitCell;
+        if (player.board.getBoard()[x][y].ship && player.board.getBoard()[x][y].ship.hasSunk) cell.classList.add('sunk');
+
+        if (!((prevX === x && prevY === y) && (player === currentPlayer))) {
+          if (player.board.getBoard()[x][y].isHit && player.board.getBoard()[x][y].ship) {
+            cell.classList.add('hit');
+            if (!player.board.getBoard()[x][y].ship.hasSunk) addFireEffect(cell);
+          } else if (player.board.getBoard()[x][y].isHit && !player.board.getBoard()[x][y].ship) {
+            cell.classList.add('miss');
+            addMissMark(cell);
+          }
+        }
+
         board.appendChild(cell);
       }
     }
     boards.appendChild(board);
   });
   printSprites();
+  if (players.every((player) => !(player instanceof AI))) {
+    setTimeout(() => {
+      printPreviousPlayerAttack();
+    }, 500);
+  }
 };
 
 const hidePlayerHP = () => {
@@ -1071,6 +1136,35 @@ const clearMainMenu = () => {
   });
 };
 
+const startGamePlayer = async (e) => {
+  e.preventDefault();
+  const player1Name = document.querySelector('#player1NameInput').value
+    ? document.querySelector('#player1NameInput').value
+    : 'Player 1';
+  const player2Name = document.querySelector('#player2NameInput').value
+    ? document.querySelector('#player2NameInput').value
+    : 'Player 2';
+
+  generatePlayers(
+    [
+      {
+        type: 'human',
+        name: player1Name,
+      },
+      {
+        type: 'human',
+        name: player2Name,
+      },
+    ],
+  );
+
+  [currentPlayer, targetPlayer] = players;
+
+  await clearMainMenu();
+  initalizeGameContainer();
+  initializeShipPlacementScreen();
+};
+
 const startGameAI = async (e) => {
   e.preventDefault();
   const playerName = document.querySelector('#player1NameInput').value
@@ -1095,7 +1189,7 @@ const startGameAI = async (e) => {
 
   await clearMainMenu();
   initalizeGameContainer();
-  initializeShipPlacementScreen(currentPlayer);
+  initializeShipPlacementScreen();
 };
 
 const clearMainMenuButtons = () => {
@@ -1111,6 +1205,67 @@ const clearMainMenuButtons = () => {
       }
     }, { once: true });
   });
+};
+
+const showVersusPlayer = async () => {
+  await clearMainMenuButtons();
+
+  const buttonsContainer = document.querySelector('.main-menu .buttons');
+
+  const form = document.createElement('form');
+
+  const ul = document.createElement('ul');
+
+  const li1 = document.createElement('li');
+
+  const label1 = document.createElement('label');
+  label1.classList.add('label');
+  label1.htmlFor = 'player1NameInput';
+  label1.textContent = 'Player 1:';
+
+  const input1 = document.createElement('input');
+  input1.id = 'player1NameInput';
+  input1.type = 'text';
+  input1.placeholder = 'Name';
+  input1.maxLength = 16;
+
+  const li2 = document.createElement('li');
+
+  const label2 = document.createElement('label');
+  label2.classList.add('label');
+  label2.htmlFor = 'player2NameInput';
+  label2.textContent = 'Player 2:';
+
+  const input2 = document.createElement('input');
+  input2.id = 'player2NameInput';
+  input2.type = 'text';
+  input2.placeholder = 'Name';
+  input2.maxLength = 16;
+
+  const li3 = document.createElement('li');
+
+  const btnStart = document.createElement('button');
+  btnStart.classList.add('button');
+  btnStart.type = 'submit';
+  btnStart.textContent = 'Start Game';
+  btnStart.addEventListener('click', startGamePlayer);
+
+  const btnBack = document.createElement('button');
+  btnBack.classList.add('button');
+  btnBack.textContent = 'Back';
+  btnBack.addEventListener('click', showVersusOptions);
+
+  li1.appendChild(label1);
+  li1.appendChild(input1);
+  li2.appendChild(label2);
+  li2.appendChild(input2);
+  li3.appendChild(btnStart);
+  ul.appendChild(li1);
+  ul.appendChild(li2);
+  ul.appendChild(li3);
+  form.appendChild(ul);
+  buttonsContainer.appendChild(form);
+  buttonsContainer.appendChild(btnBack);
 };
 
 const toggleAIDifficulty = (e) => {
@@ -1206,7 +1361,7 @@ const showVersusOptions = async () => {
   const versusPlayerBtn = document.createElement('button');
   versusPlayerBtn.classList.add('button');
   versusPlayerBtn.textContent = 'Versus Player';
-  // versusPlayerBtn.addEventListener('click', showVersusPlayer);
+  versusPlayerBtn.addEventListener('click', showVersusPlayer);
 
   const versusAIBtn = document.createElement('button');
   versusAIBtn.classList.add('button');
@@ -1262,23 +1417,3 @@ const initializeMainMenu = () => {
 };
 
 initializeMainMenu();
-
-// Temporary for fast testing
-
-// generatePlayers(
-//   [
-//     {
-//       type: 'human',
-//       name: 'Player 1',
-//     },
-//     {
-//       type: 'AI',
-//       difficulty: 'Easy',
-//     },
-//   ],
-// );
-
-// [currentPlayer, targetPlayer] = players;
-
-// initalizeGameContainer();
-// initializeShipPlacementScreen(currentPlayer);

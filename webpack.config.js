@@ -12,6 +12,7 @@ module.exports = {
     ai: './src/scripts/player/ai.js',
     player: './src/scripts/player/player.js',
   },
+  devtool: 'inline-source-map',
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',

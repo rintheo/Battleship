@@ -51,7 +51,19 @@ export default class GameBoard {
     ship.isPositioned(bowCoordinates, isPlacedHorizontally);
   }
 
+  resetCellsJustGotHit() {
+    for (let i = 0; i < 10; i += 1) {
+      for (let j = 0; j < 10; j += 1) {
+        this.board[i][j].resetJustGotHit();
+        if (this.board[i][j].ship !== null) {
+          this.board[i][j].ship.resetJustSunk();
+        }
+      }
+    }
+  }
+
   async receiveAttack([x, y]) {
+    this.resetCellsJustGotHit();
     this.board[x][y].hit();
     if (this.board[x][y].ship !== null) {
       this.board[x][y].ship.hit();

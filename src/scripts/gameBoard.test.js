@@ -153,6 +153,73 @@ describe('Tests for GameBoard class', () => {
       expect(board.getBoard()[4][5].ship).toBe(carrier);
       expect(board.getBoard()[4][5].ship.hits).toBe(1);
     });
+
+    test('Receive an attack and reset previous hit cell justGotHit property', () => {
+      board.receiveAttack([4, 5]);
+      expect(board.getBoard()[4][5].isHit).toBe(true);
+      expect(board.getBoard()[4][5].justGotHit).toBe(true);
+      expect(board.getBoard()[4][5].ship).toBe(carrier);
+      expect(board.getBoard()[4][5].ship.hits).toBe(1);
+
+      board.receiveAttack([5, 5]);
+      expect(board.getBoard()[4][5].isHit).toBe(true);
+      expect(board.getBoard()[4][5].justGotHit).toBe(false);
+      expect(board.getBoard()[4][5].ship).toBe(carrier);
+
+      expect(board.getBoard()[5][5].isHit).toBe(true);
+      expect(board.getBoard()[5][5].justGotHit).toBe(true);
+      expect(board.getBoard()[5][5].ship).toBe(carrier);
+      expect(board.getBoard()[5][5].ship.hits).toBe(2);
+    });
+
+    test('Receive an attack that sinks a ship and reset previous hit cell justGotHit and ship justSunk property', () => {
+      destroyer = new Ship(2);
+      cruiser = new Ship(3);
+      board.placeShip([5, 4], destroyer, true);
+      board.placeShip([5, 3], cruiser, true);
+
+      board.receiveAttack([5, 4]);
+      expect(board.getBoard()[5][4].isHit).toBe(true);
+      expect(board.getBoard()[5][4].justGotHit).toBe(true);
+      expect(board.getBoard()[5][4].ship).toBe(destroyer);
+      expect(board.getBoard()[5][4].ship.hits).toBe(1);
+      expect(board.getBoard()[5][4].ship.hasSunk).toBe(false);
+      expect(board.getBoard()[5][4].ship.justSunk).toBe(false);
+
+      board.receiveAttack([4, 4]);
+      expect(board.getBoard()[4][4].isHit).toBe(true);
+      expect(board.getBoard()[4][4].justGotHit).toBe(true);
+      expect(board.getBoard()[4][4].ship).toBe(destroyer);
+      expect(board.getBoard()[4][4].ship.hits).toBe(2);
+      expect(board.getBoard()[4][4].ship.hasSunk).toBe(true);
+      expect(board.getBoard()[5][4].ship.justSunk).toBe(true);
+
+      board.receiveAttack([5, 3]);
+      expect(board.getBoard()[5][3].isHit).toBe(true);
+      expect(board.getBoard()[5][3].justGotHit).toBe(true);
+      expect(board.getBoard()[5][3].ship).toBe(cruiser);
+      expect(board.getBoard()[5][3].ship.hits).toBe(1);
+      expect(board.getBoard()[5][3].ship.hasSunk).toBe(false);
+      expect(board.getBoard()[5][3].ship.justSunk).toBe(false);
+
+      board.receiveAttack([6, 3]);
+      expect(board.getBoard()[6][3].isHit).toBe(true);
+      expect(board.getBoard()[6][3].justGotHit).toBe(true);
+      expect(board.getBoard()[6][3].ship).toBe(cruiser);
+      expect(board.getBoard()[6][3].ship.hits).toBe(2);
+      expect(board.getBoard()[6][3].ship.hasSunk).toBe(false);
+      expect(board.getBoard()[6][3].ship.justSunk).toBe(false);
+
+      board.receiveAttack([4, 3]);
+      expect(board.getBoard()[4][3].isHit).toBe(true);
+      expect(board.getBoard()[4][3].justGotHit).toBe(true);
+      expect(board.getBoard()[4][3].ship).toBe(cruiser);
+      expect(board.getBoard()[4][3].ship.hits).toBe(3);
+      expect(board.getBoard()[4][3].ship.hasSunk).toBe(true);
+      expect(board.getBoard()[4][3].ship.justSunk).toBe(true);
+
+      expect(board.getBoard()[5][4].ship.justSunk).toBe(false);
+    });
   });
 
   describe('Reporting fleet status', () => {

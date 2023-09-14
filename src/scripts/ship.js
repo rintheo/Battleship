@@ -4,6 +4,7 @@ export default class Ship {
     this.hits = 0;
     this.hasPositioned = false;
     this.hasSunk = false;
+    this.justSunk = false;
     this.type = type;
     this.bowCoordinates = null;
     this.isHorizontal = null;
@@ -16,6 +17,11 @@ export default class Ship {
 
   isSunk() {
     this.hasSunk = true;
+    this.justSunk = true;
+  }
+
+  resetJustSunk() {
+    this.justSunk = false;
   }
 
   isPositioned(bowCoordinates, isHorizontal) {
