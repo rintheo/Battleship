@@ -10,6 +10,63 @@ import spriteSubmarine from '../assets/shipSubmarine.png';
 import spriteFire from '../assets/fire.gif';
 import spriteExplosion from '../assets/explosion.gif';
 
+const playMenuClickSFX = () => {
+  const audio = document.querySelector('#sfxMenu');
+  audio.currentTime = 0;
+  audio.play();
+};
+
+const playFireSFX = () => {
+  const audio = document.querySelector('#sfxFire');
+  audio.currentTime = 0;
+  audio.play();
+};
+
+const stopAllBGM = () => {
+  stopMenuBGM();
+  stopVictoryBGM();
+  stopGameBGM();
+};
+
+const playMenuBGM = () => {
+  stopVictoryBGM();
+  stopGameBGM();
+  const audio = document.querySelector('#bgmMenu');
+  audio.play();
+};
+
+const stopMenuBGM = () => {
+  const audio = document.querySelector('#bgmMenu');
+  audio.pause();
+  audio.currentTime = 0;
+};
+
+const playVictoryBGM = () => {
+  stopMenuBGM();
+  stopGameBGM();
+  const audio = document.querySelector('#bgmVictory');
+  audio.play();
+};
+
+const stopVictoryBGM = () => {
+  const audio = document.querySelector('#bgmVictory');
+  audio.pause();
+  audio.currentTime = 0;
+};
+
+const playGameBGM = () => {
+  stopMenuBGM();
+  stopVictoryBGM();
+  const audio = document.querySelector('#bgmGame');
+  audio.play();
+};
+
+const stopGameBGM = () => {
+  const audio = document.querySelector('#bgmGame');
+  audio.pause();
+  audio.currentTime = 0;
+};
+
 const shipsData = [
   {
     type: 'Carrier',
@@ -61,6 +118,7 @@ const returnFocusToGame = () => {
 };
 
 const hideDialog = () => {
+  playMenuClickSFX();
   const dialogOverlay = document.querySelector('.dialog-overlay');
   dialogOverlay.classList.add('fade-out');
   dialogOverlay.addEventListener('animationend', () => {
@@ -108,6 +166,7 @@ const showWinnerDialog = () => {
 
 const checkWinningCondition = () => {
   if (!targetPlayer.board.isFleetOperational()) {
+    playVictoryBGM();
     loseFocusFromGame();
     showWinnerDialog();
     hidePlayerHP();
@@ -343,12 +402,14 @@ const processHit = async ([x, y]) => {
 };
 
 const hitCellAI = () => {
+  playFireSFX();
   const [x, y] = currentPlayer.chooseAttackCoordinates(targetPlayer);
   scrollToTop();
   processHit([x, y]);
 };
 
 const hitCellPlayer = (e) => {
+  playFireSFX();
   const cell = e.currentTarget;
   const { x } = cell.dataset;
   const { y } = cell.dataset;
@@ -446,6 +507,7 @@ const restartGame = () => {
 };
 
 const returnToMenu = () => {
+  stopAllBGM();
   returnFocusToGame();
   hideDialog();
   clearGameContainer();
@@ -489,6 +551,7 @@ const showPauseMenu = () => {
 };
 
 const clickPauseMenu = () => {
+  playMenuClickSFX();
   loseFocusFromGame();
   hidePlayerHP();
   showPauseMenu();
@@ -567,6 +630,7 @@ const confirmPlacement = () => {
 };
 
 const clickConfirmPlacement = () => {
+  playMenuClickSFX();
   currentPlayerShips.length = 0;
 
   const placedShips = document.querySelectorAll('.placement.boards .cell.bow .sprite-container');
@@ -835,6 +899,7 @@ const unplaceShipFromPlacementBoard = (e) => {
 };
 
 const resetPlacementBoard = () => {
+  playMenuClickSFX();
   shipsData.forEach((ship) => {
     const unplacedContainer = document.querySelector(`.placement.info .container[data-ship="${ship.type}"]`);
     const unplacedCell = document.querySelector(`.placement.info .container[data-ship="${ship.type}"] .cell:last-child`);
@@ -901,6 +966,7 @@ const resizePlacementCells = () => {
 };
 
 const initializeShipPlacementScreen = () => {
+  playGameBGM();
   previousHitCell = [-1, -1];
   window.addEventListener('mouseup', resetShipPlacementDragData);
   window.addEventListener('resize', resizePlacementCells);
@@ -1098,6 +1164,7 @@ const initializeBoard = async () => {
       if (currentPlayer.board.getBoard()[prevX][prevY].ship) animateCurrentPlayerHPHitOnTurnStart();
     }
     setTimeout(() => {
+      if (prevX !== -1 && prevY !== -1) playFireSFX();
       printPreviousPlayerAttack();
     }, 500);
   }
@@ -1252,6 +1319,7 @@ const clearMainMenu = () => {
 };
 
 const startGamePlayer = async (e) => {
+  playMenuClickSFX();
   e.preventDefault();
   const player1Name = document.querySelector('#player1NameInput').value
     ? document.querySelector('#player1NameInput').value
@@ -1281,6 +1349,7 @@ const startGamePlayer = async (e) => {
 };
 
 const startGameAI = async (e) => {
+  playMenuClickSFX();
   e.preventDefault();
   const playerName = document.querySelector('#player1NameInput').value
     ? document.querySelector('#player1NameInput').value
@@ -1323,6 +1392,7 @@ const clearMainMenuButtons = () => {
 };
 
 const showVersusPlayer = async () => {
+  playMenuClickSFX();
   await clearMainMenuButtons();
 
   const buttonsContainer = document.querySelector('.main-menu .buttons');
@@ -1384,6 +1454,7 @@ const showVersusPlayer = async () => {
 };
 
 const toggleAIDifficulty = (e) => {
+  playMenuClickSFX();
   const currentToggledButton = document.querySelector('.main-menu form .button.AI.toggled');
   const clickedButton = e.currentTarget;
 
@@ -1392,6 +1463,7 @@ const toggleAIDifficulty = (e) => {
 };
 
 const showVersusAI = async () => {
+  playMenuClickSFX();
   await clearMainMenuButtons();
 
   const buttonsContainer = document.querySelector('.main-menu .buttons');
@@ -1469,6 +1541,8 @@ const showVersusAI = async () => {
 };
 
 const showVersusOptions = async () => {
+  playMenuClickSFX();
+  playMenuBGM();
   await clearMainMenuButtons();
 
   const buttonsContainer = document.querySelector('.main-menu .buttons');
