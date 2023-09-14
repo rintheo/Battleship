@@ -402,7 +402,7 @@ const restartGame = () => {
     ],
   );
   [currentPlayer, targetPlayer] = players;
-  initalizeGameContainer();
+  initializeGameContainer();
   initializeShipPlacementScreen();
 };
 
@@ -517,7 +517,7 @@ const confirmPlacement = () => {
     confirmPlacement();
   } else {
     clearGameContainer();
-    initalizeGameContainer();
+    initializeGameContainer();
     initializeShipPlacementScreen();
   }
 };
@@ -857,6 +857,7 @@ const resizePlacementCells = () => {
 };
 
 const initializeShipPlacementScreen = () => {
+  previousHitCell = [-1, -1];
   window.addEventListener('mouseup', resetShipPlacementDragData);
   window.addEventListener('resize', resizePlacementCells);
   const game = document.querySelector('.game');
@@ -959,7 +960,7 @@ const clearGameContainer = () => {
   }
 };
 
-const initalizeGameContainer = () => {
+const initializeGameContainer = () => {
   const game = document.querySelector('.game');
 
   const settingsBtnContainer = document.createElement('div');
@@ -1119,7 +1120,7 @@ const initializePlayerHP = () => {
 };
 
 const initializeGame = () => {
-  initalizeGameContainer();
+  initializeGameContainer();
   initializePlayerHP();
   initializeBoard();
 };
@@ -1161,7 +1162,7 @@ const startGamePlayer = async (e) => {
   [currentPlayer, targetPlayer] = players;
 
   await clearMainMenu();
-  initalizeGameContainer();
+  initializeGameContainer();
   initializeShipPlacementScreen();
 };
 
@@ -1188,7 +1189,7 @@ const startGameAI = async (e) => {
   [currentPlayer, targetPlayer] = players;
 
   await clearMainMenu();
-  initalizeGameContainer();
+  initializeGameContainer();
   initializeShipPlacementScreen();
 };
 
